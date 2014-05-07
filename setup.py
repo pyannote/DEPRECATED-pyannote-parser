@@ -27,7 +27,7 @@ import versioneer
 versioneer.versionfile_source = 'pyannote/parser/_version.py'
 versioneer.versionfile_build = versioneer.versionfile_source
 versioneer.tag_prefix = ''
-versioneer.parentdir_prefix = 'pyannote.parser-'
+versioneer.parentdir_prefix = 'pyannote-parser-'
 
 from setuptools import setup, find_packages
 
@@ -37,7 +37,7 @@ setup(
     namespace_packages = ['pyannote'],
     packages=find_packages(),
     install_requires=[
-        'pyannote.core >= 0.0.2'
+        'pyannote.core >= 0.0.2',
     ],
     # versioneer
     version=versioneer.get_version(),
