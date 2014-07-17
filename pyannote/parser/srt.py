@@ -38,10 +38,29 @@ http://en.wikipedia.org/wiki/SubRip
 
 
 import pysrt
-from pyannote.core import Transcription
+import itertools
+import numpy as np
+from pyannote.core import Transcription, T
 
 
 class SRTParser(object):
+    """SRT file parser
+
+    Parameters
+    ----------
+    split : bool, optional
+        Try to detect and split multiple speaker subtitles. Defaults to False.
+    duration : bool, optional
+        Estimate duration of multiple lines based on string length.
+        Defaults to False.
+
+
+    """
+
+    def __init__(self, split=False, duration=False):
+        super(SRTParser, self).__init__()
+        self.split = split
+        self.duration = duration
 
     def _timeInSeconds(self, t):
         h = t.hours
@@ -50,22 +69,87 @@ class SRTParser(object):
         u = t.milliseconds
         return 3600. * h + 60. * m + s + 1e-3 * u
 
-    def read(self, path, uri=None):
+    def _split(self, raw):
+        """Return list of dialogue lines"""
 
-        transcription = Transcription(uri=uri)
+        # split multiple speaker subtitles
+        # "-hello!\n-hi!"  >>> ["-hello!", "hi!"]
+        # "how do you do?" >>> ["how do you do?"]
+        if self.split:
+            lines = raw.split('\n-')
+
+        # don't...
+        # "-hello!\n-hi!"  >>> ["-hello!\n-hi!"]
+        # "how do you do?" >>> ["how do you do?"]
+        else:
+            lines = [raw]
+
+        # merge same speaker lines
+        # "[do you think\nI'm dumb?"] >>> ["do you think I'm dumb?"]
+        lines = [' '.join(line.split('\n')) for line in lines]
+
+        return lines
+
+    def _duration(self, lines, start, end):
+        """Iterate dialogue lines + (estimated) timeranges"""
+
+        if self.duration:
+            length = np.array([len(line) for line in lines])
+            ratio = 1. * np.cumsum(length) / np.sum(length)
+            end_times = start + (end - start) * ratio
+        else:
+            end_times = [T() for line in lines[:-1]] + [end]
+
+        start_time = start
+        for line, end_time in itertools.izip(lines, end_times):
+            yield line, start_time, end_time
+            start_time = end_time
+
+    def read(self, path, uri=None):
+        """Load .srt file as transcription
+
+        Parameters
+        ----------
+        path : str
+            Path to .srt file
+
+        Returns
+        -------
+        subtitle : Transcription
+        """
+
+        # load .srt file using pysrt
         subtitles = pysrt.open(path)
 
+        # initial empty transcription
+        transcription = Transcription(uri=uri)
+
+        # keep track of end of previous subtitle
         prev_end = None
+
+        # loop on each subtitle in chronological order
         for subtitle in subtitles:
 
+            # convert start/end time into seconds
             start = self._timeInSeconds(subtitle.start)
             end = self._timeInSeconds(subtitle.end)
 
-            if prev_end and start > prev_end:
-                transcription.add_edge(prev_end, start)
+            if prev_end:
+                # connect current subtitle with previous one
+                # if there is a gap between them
+                if start > prev_end:
+                    transcription.add_edge(prev_end, start)
+                # raise an error in case current subtitle starts
+                # before previous subtitle ends
+                elif start < prev_end:
+                    raise ValueError('Non-chronological subtitles')
 
-            text = subtitle.text
-            transcription.add_edge(start, end, subtitle=text)
+            # split subtitle in multiple speaker lines (only if needed)
+            lines = self._split(subtitle.text)
+
+            # loop on subtitle lines
+            for line, start_t, end_t in self._duration(lines, start, end):
+                transcription.add_edge(start_t, end_t, subtitle=line)
 
             prev_end = end
 
