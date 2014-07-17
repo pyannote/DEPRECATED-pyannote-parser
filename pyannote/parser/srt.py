@@ -3,7 +3,7 @@
 
 # The MIT License (MIT)
 
-# Copyright (c) 2014 CNRS (Hervé BREDIN - http://herve.niderb.fr)
+# Copyright (c) 2014 CNRS
 
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -23,39 +23,50 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-import versioneer
-versioneer.versionfile_source = 'pyannote/parser/_version.py'
-versioneer.versionfile_build = versioneer.versionfile_source
-versioneer.tag_prefix = ''
-versioneer.parentdir_prefix = 'pyannote-parser-'
+# Authors
+# Hervé BREDIN (http://herve.niderb.fr)
 
-from setuptools import setup, find_packages
+from __future__ import unicode_literals
 
-setup(
+"""
+SRT (SubRip Text) is a file format to specify subtitles for a recorded video.
 
-    # package
-    namespace_packages=['pyannote'],
-    packages=find_packages(),
-    install_requires=[
-        'pyannote.core >= 0.0.3',
-        'pysrt >= 1.0.1'
-    ],
-    # versioneer
-    version=versioneer.get_version(),
-    cmdclass=versioneer.get_cmdclass(),
+References
+----------
+http://en.wikipedia.org/wiki/SubRip
+"""
 
-    # PyPI
-    name='pyannote.parser',
-    description=('PyAnnote parsers'),
-    author='Hervé Bredin',
-    author_email='bredin@limsi.fr',
-    url='http://herve.niderb.fr/',
-    classifiers=[
-        "Development Status :: 4 - Beta",
-        "Intended Audience :: Science/Research",
-        "License :: OSI Approved :: MIT License",
-        "Natural Language :: English",
-        "Programming Language :: Python :: 2.7",
-        "Topic :: Scientific/Engineering"
-    ],
-)
+
+import pysrt
+from pyannote.core import Transcription
+
+
+class SRTParser(object):
+
+    def _timeInSeconds(self, t):
+        h = t.hours
+        m = t.minutes
+        s = t.seconds
+        u = t.milliseconds
+        return 3600. * h + 60. * m + s + 1e-3 * u
+
+    def read(self, path, uri=None):
+
+        transcription = Transcription(uri=uri)
+        subtitles = pysrt.open(path)
+
+        prev_end = None
+        for subtitle in subtitles:
+
+            start = self._timeInSeconds(subtitle.start)
+            end = self._timeInSeconds(subtitle.end)
+
+            if prev_end and start > prev_end:
+                transcription.add_edge(prev_end, start)
+
+            text = subtitle.text
+            transcription.add_edge(start, end, subtitle=text)
+
+            prev_end = end
+
+        return transcription
