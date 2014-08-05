@@ -1,3 +1,7 @@
+### Version 0.1 (2014-08-05)
+
+  - feat add support for SRT file format
+
 ### Version 0.0.2 (2014-06-04)
 
   - feat: add support for REPERE file format
