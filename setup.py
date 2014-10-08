@@ -58,4 +58,8 @@ setup(
         "Programming Language :: Python :: 2.7",
         "Topic :: Scientific/Engineering"
     ],
+    entry_points="""
+        [pyannote.parser.plugin]
+        MDTMParser=pyannote.parser.annotation.mdtm:MDTMParser
+    """
 )

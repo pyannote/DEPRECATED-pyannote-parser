@@ -25,665 +25,565 @@
 
 from __future__ import unicode_literals
 
-import sys
-import pandas
-import numpy as np
-from pyannote.core import Segment, Timeline, Annotation, Scores
-from pyannote.core.feature import SlidingWindowFeature
-from pyannote.core import PYANNOTE_URI, PYANNOTE_MODALITY, \
-    PYANNOTE_SEGMENT, PYANNOTE_TRACK, PYANNOTE_LABEL, PYANNOTE_SCORE
+# import sys
+# import pandas
+# import numpy as np
+# from pyannote.core import Segment, Timeline, Annotation, Scores
+# from pyannote.core.feature import SlidingWindowFeature
+# from pyannote.core import PYANNOTE_URI, PYANNOTE_MODALITY, \
+#     PYANNOTE_SEGMENT, PYANNOTE_TRACK, PYANNOTE_LABEL, PYANNOTE_SCORE
 
 
-class BaseTimelineParser(object):
-    def __init__(self):
-        super(BaseTimelineParser, self).__init__()
+from abc import ABCMeta, abstractmethod
 
-        # (uri, modality) ==> timeline
-        self.reset()
 
-    def __get_uris(self):
-        return sorted(self._loaded)
-    uris = property(fget=__get_uris)
-    """"""
+class Parser(object):
 
-    def _add(self, segment, uri):
-        if uri not in self._loaded:
-            self._loaded[uri] = Timeline(uri=uri)
-        self._loaded[uri].add(segment)
+    __metaclass__ = ABCMeta
 
-    def reset(self):
-        self._loaded = {}
+    @classmethod
+    @abstractmethod
+    def file_extensions(cls):
+        pass
 
-    def read(self, path, uri=None, **kwargs):
-        raise NotImplementedError('')
+    @abstractmethod
+    def read(self, path, **kwargs):
+        pass
 
-    def __call__(self, uri=None, **kwargs):
-        """
+    @abstractmethod
+    def __call__(self, **kwargs):
+        pass
 
-        Parameters
-        ----------
-        uri : str, optional
-            If None and there is more than one resource
 
-        Returns
-        -------
-        timeline : :class:`pyannote.base.timeline.Timeline`
+# class BaseTimelineParser(object):
+#     def __init__(self):
+#         super(BaseTimelineParser, self).__init__()
 
-        """
+#         # (uri, modality) ==> timeline
+#         self.reset()
 
-        match = dict(self._loaded)
+#     def __get_uris(self):
+#         return sorted(self._loaded)
+#     uris = property(fget=__get_uris)
+#     """"""
 
-        # filter out all timelines
-        # but the ones for the requested resource
-        if uri is not None:
-            match = {v: timeline for v, timeline in match.iteritems()
-                     if v == uri}
+#     def _add(self, segment, uri):
+#         if uri not in self._loaded:
+#             self._loaded[uri] = Timeline(uri=uri)
+#         self._loaded[uri].add(segment)
 
-        if len(match) == 0:
-            # empty annotation
-            return Timeline(uri=uri)
-        elif len(match) == 1:
-            return match.values()[0]
-        else:
-            raise ValueError('')
+#     def reset(self):
+#         self._loaded = {}
 
+#     def read(self, path, uri=None, **kwargs):
+#         raise NotImplementedError('')
 
-class BaseTextualTimelineParser(BaseTimelineParser):
+#     def __call__(self, uri=None, **kwargs):
+#         """
 
-    def _comment(self, line):
-        raise NotImplementedError('')
+#         Parameters
+#         ----------
+#         uri : str, optional
+#             If None and there is more than one resource
 
-    def _parse(self, line):
-        raise NotImplementedError('')
+#         Returns
+#         -------
+#         timeline : :class:`pyannote.base.timeline.Timeline`
 
-    def read(self, path, uri=None, **kwargs):
+#         """
 
-        # defaults PYANNOTE_URI to path
-        if uri is None:
-            uri = path
+#         match = dict(self._loaded)
 
-        # open file and loop on each line
-        fp = open(path, 'r')
-        for line in fp:
+#         # filter out all timelines
+#         # but the ones for the requested resource
+#         if uri is not None:
+#             match = {v: timeline for v, timeline in match.iteritems()
+#                      if v == uri}
 
-            # strip line
-            line = line.strip()
+#         if len(match) == 0:
+#             # empty annotation
+#             return Timeline(uri=uri)
+#         elif len(match) == 1:
+#             return match.values()[0]
+#         else:
+#             raise ValueError('')
 
-            # comment ?
-            if self._comment(line):
-                continue
 
-            # parse current line
-            s, v = self._parse(line)
+# class BaseTextualTimelineParser(BaseTimelineParser):
 
-            # found resource ?
-            if v is None:
-                v = uri
+#     def _comment(self, line):
+#         raise NotImplementedError('')
 
-            # add segment
-            self._add(s, v)
+#     def _parse(self, line):
+#         raise NotImplementedError('')
 
-        fp.close()
+#     def read(self, path, uri=None, **kwargs):
 
-        return self
+#         # defaults PYANNOTE_URI to path
+#         if uri is None:
+#             uri = path
 
-    def write(self, timeline, f=sys.stdout, uri=None):
-        """
+#         # open file and loop on each line
+#         fp = open(path, 'r')
+#         for line in fp:
 
-        Parameters
-        ----------
-        timeline : :class:`pyannote.base.timeline.Timeline`
-            Timeline
-        f : file or str, optional
-            Default is stdout.
-        uri : str, optional
-            When provided, overrides `timeline` uri attribute.
-        """
+#             # strip line
+#             line = line.strip()
 
-        if uri is None:
-            uri = timeline.uri
+#             # comment ?
+#             if self._comment(line):
+#                 continue
 
-        if isinstance(f, file):
-            self._append(timeline, f, uri)
-        else:
-            f = open(f, 'w')
-            self._append(timeline, f, uri)
-            f.close()
+#             # parse current line
+#             s, v = self._parse(line)
 
+#             # found resource ?
+#             if v is None:
+#                 v = uri
 
-class BaseAnnotationParser(object):
+#             # add segment
+#             self._add(s, v)
 
-    def __init__(self):
-        super(BaseAnnotationParser, self).__init__()
-        self.reset()
+#         fp.close()
 
-    def __get_uris(self):
-        return sorted(set([v for (v, m) in self._loaded]))
-    uris = property(fget=__get_uris)
-    """"""
+#         return self
 
-    def __get_modalities(self):
-        return sorted(set([m for (v, m) in self._loaded]))
-    modalities = property(fget=__get_modalities)
-    """"""
+#     def write(self, timeline, f=sys.stdout, uri=None):
+#         """
 
-    def _add(self, segment, track, label, uri, modality):
-        key = (uri, modality)
-        if key not in self._loaded:
-            self._loaded[key] = Annotation(uri=uri, modality=modality)
-        if track is None:
-            track = self._loaded[key].new_track(segment)
-        self._loaded[key][segment, track] = label
+#         Parameters
+#         ----------
+#         timeline : :class:`pyannote.base.timeline.Timeline`
+#             Timeline
+#         f : file or str, optional
+#             Default is stdout.
+#         uri : str, optional
+#             When provided, overrides `timeline` uri attribute.
+#         """
 
-    def reset(self):
-        self._loaded = {}
+#         if uri is None:
+#             uri = timeline.uri
 
-    def read(self, path, uri=None, modality=None, **kwargs):
-        raise NotImplementedError('')
+#         if isinstance(f, file):
+#             self._append(timeline, f, uri)
+#         else:
+#             f = open(f, 'w')
+#             self._append(timeline, f, uri)
+#             f.close()
 
-    def __call__(self, uri=None, modality=None, **kwargs):
-        """
 
-        Parameters
-        ----------
-        uri : str, optional
-            If None and there is more than one resource
-        modality : str, optional
+# class BaseAnnotationParser(object):
 
-        Returns
-        -------
-        annotation : :class:`pyannote.base.annotation.Annotation`
+#     def __init__(self):
+#         super(BaseAnnotationParser, self).__init__()
+#         self.reset()
 
-        """
+#     def __get_uris(self):
+#         return sorted(set([v for (v, m) in self._loaded]))
+#     uris = property(fget=__get_uris)
+#     """"""
 
-        match = dict(self._loaded)
+#     def __get_modalities(self):
+#         return sorted(set([m for (v, m) in self._loaded]))
+#     modalities = property(fget=__get_modalities)
+#     """"""
 
-        # filter out all annotations
-        # but the ones for the requested resource
-        if uri is not None:
-            match = {(v, m): ann for (v, m), ann in match.iteritems()
-                     if v == uri}
+#     def _add(self, segment, track, label, uri, modality):
+#         key = (uri, modality)
+#         if key not in self._loaded:
+#             self._loaded[key] = Annotation(uri=uri, modality=modality)
+#         if track is None:
+#             track = self._loaded[key].new_track(segment)
+#         self._loaded[key][segment, track] = label
 
-        # filter out all remaining annotations
-        # but the ones for the requested modality
-        if modality is not None:
-            match = {(v, m): ann for (v, m), ann in match.iteritems()
-                     if m == modality}
+#     def reset(self):
+#         self._loaded = {}
 
-        if len(match) == 0:
-            A = Annotation(uri=uri, modality=modality)
+#     def read(self, path, uri=None, modality=None, **kwargs):
+#         raise NotImplementedError('')
 
-        elif len(match) == 1:
-            A = match.values()[0]
+#     def __call__(self, uri=None, modality=None, **kwargs):
+#         """
 
-        else:
-            msg = 'Found more than one matching annotation: %s'
-            raise ValueError(msg % match.keys())
+#         Parameters
+#         ----------
+#         uri : str, optional
+#             If None and there is more than one resource
+#         modality : str, optional
 
-        return A
+#         Returns
+#         -------
+#         annotation : :class:`pyannote.base.annotation.Annotation`
 
+#         """
 
-class BaseTextualFormat(object):
+#         match = dict(self._loaded)
 
-    def get_comment(self):
-        return None
+#         # filter out all annotations
+#         # but the ones for the requested resource
+#         if uri is not None:
+#             match = {(v, m): ann for (v, m), ann in match.iteritems()
+#                      if v == uri}
 
-    def get_fields(self):
-        raise NotImplementedError('')
+#         # filter out all remaining annotations
+#         # but the ones for the requested modality
+#         if modality is not None:
+#             match = {(v, m): ann for (v, m), ann in match.iteritems()
+#                      if m == modality}
 
-    def get_segment(self, row):
-        raise NotImplementedError('')
+#         if len(match) == 0:
+#             A = Annotation(uri=uri, modality=modality)
 
-    def get_converters(self):
-        return None
+#         elif len(match) == 1:
+#             A = match.values()[0]
 
-    def get_default_modality(self):
-        return None
+#         else:
+#             msg = 'Found more than one matching annotation: %s'
+#             raise ValueError(msg % match.keys())
 
+#         return A
 
-class BaseTextualParser(object):
 
-    def __init__(self):
-        super(BaseTextualParser, self).__init__()
+# class BaseTextualFormat(object):
 
-    def __get_uris(self):
-        return sorted(set([v for (v, m) in self._loaded]))
-    uris = property(fget=__get_uris)
-    """"""
+#     def get_comment(self):
+#         return None
 
-    def __get_modalities(self):
-        return sorted(set([m for (v, m) in self._loaded]))
-    modalities = property(fget=__get_modalities)
-    """"""
+#     def get_fields(self):
+#         raise NotImplementedError('')
 
-    def no_match(self, uri=None, modality=None):
-        raise NotImplementedError('')
+#     def get_segment(self, row):
+#         raise NotImplementedError('')
 
-    def __call__(self, uri=None, modality=None, **kwargs):
-        """
+#     def get_converters(self):
+#         return None
 
-        Parameters
-        ----------
-        uri : str, optional
-            If None and there is more than one resource
-        modality : str, optional
+#     def get_default_modality(self):
+#         return None
 
-        Returns
-        -------
-        annotation : :class:`Annotation` or :class:`Scores`
 
-        """
+# class BaseTextualParser(object):
 
-        match = dict(self._loaded)
+#     def __init__(self):
+#         super(BaseTextualParser, self).__init__()
 
-        # filter out all annotations
-        # but the ones for the requested resource
-        if uri is not None:
-            match = {(v, m): ann for (v, m), ann in match.iteritems()
-                     if v == uri}
+#     def __get_uris(self):
+#         return sorted(set([v for (v, m) in self._loaded]))
+#     uris = property(fget=__get_uris)
+#     """"""
 
-        # filter out all remaining annotations
-        # but the ones for the requested modality
-        if modality is not None:
-            match = {(v, m): ann for (v, m), ann in match.iteritems()
-                     if m == modality}
+#     def __get_modalities(self):
+#         return sorted(set([m for (v, m) in self._loaded]))
+#     modalities = property(fget=__get_modalities)
+#     """"""
 
-        if len(match) == 0:
-            A = self.no_match(uri=uri, modality=modality)
+#     def no_match(self, uri=None, modality=None):
+#         raise NotImplementedError('')
 
-        elif len(match) == 1:
-            A = match.values()[0]
+#     def __call__(self, uri=None, modality=None, **kwargs):
+#         """
 
-        else:
-            msg = 'Found more than one matching annotation: %s'
-            raise ValueError(msg % match.keys())
+#         Parameters
+#         ----------
+#         uri : str, optional
+#             If None and there is more than one resource
+#         modality : str, optional
 
-        return A
+#         Returns
+#         -------
+#         annotation : :class:`Annotation` or :class:`Scores`
 
-    def comment(self, text, f=sys.stdout):
-        """Add comment to a file
+#         """
 
-        Comment marker is automatically added in front of the text
+#         match = dict(self._loaded)
 
-        Parameters
-        ----------
-        text : str
-            Actual comment
-        f : file or str, optional
-            Default is stdout.
+#         # filter out all annotations
+#         # but the ones for the requested resource
+#         if uri is not None:
+#             match = {(v, m): ann for (v, m), ann in match.iteritems()
+#                      if v == uri}
 
-        """
-        comment_marker = self.get_comment()
-        if comment_marker is None:
-            raise NotImplementedError('Comments are not supported.')
+#         # filter out all remaining annotations
+#         # but the ones for the requested modality
+#         if modality is not None:
+#             match = {(v, m): ann for (v, m), ann in match.iteritems()
+#                      if m == modality}
 
-        if isinstance(f, file):
-            f.write('%s %s\n' % (comment_marker, text))
-            f.flush()
-        else:
-            with open(f, 'w') as g:
-                g.write('%s %s\n' % (comment_marker, text))
+#         if len(match) == 0:
+#             A = self.no_match(uri=uri, modality=modality)
 
-    def write(self, annotation, f=sys.stdout, uri=None, modality=None):
-        """
+#         elif len(match) == 1:
+#             A = match.values()[0]
 
-        Parameters
-        ----------
-        annotation : `Annotation` or `Score`
-            Annotation
-        f : file or str, optional
-            Default is stdout.
-        uri, modality : str, optional
-            Override `annotation` attributes
+#         else:
+#             msg = 'Found more than one matching annotation: %s'
+#             raise ValueError(msg % match.keys())
 
-        """
+#         return A
 
-        if uri is None:
-            uri = annotation.uri
-        if modality is None:
-            modality = annotation.modality
+#     def comment(self, text, f=sys.stdout):
+#         """Add comment to a file
 
-        if isinstance(f, file):
-            self._append(annotation, f, uri, modality)
-            f.flush()
-        else:
-            with open(f, 'w') as g:
-                self._append(annotation, g, uri, modality)
+#         Comment marker is automatically added in front of the text
 
+#         Parameters
+#         ----------
+#         text : str
+#             Actual comment
+#         f : file or str, optional
+#             Default is stdout.
 
-class BaseTextualAnnotationParser(BaseTextualParser):
+#         """
+#         comment_marker = self.get_comment()
+#         if comment_marker is None:
+#             raise NotImplementedError('Comments are not supported.')
 
-    def read(self, path, uri=None, modality=None, **kwargs):
-        """
+#         if isinstance(f, file):
+#             f.write('%s %s\n' % (comment_marker, text))
+#             f.flush()
+#         else:
+#             with open(f, 'w') as g:
+#                 g.write('%s %s\n' % (comment_marker, text))
 
-        Parameters
-        ----------
-        path : str
+#     def write(self, annotation, f=sys.stdout, uri=None, modality=None):
+#         """
 
-        modality : str, optional
-            Force all entries to be considered as coming from this modality.
-            Only taken into account when file format does not provide
-            any field related to modality (e.g. .seg files)
+#         Parameters
+#         ----------
+#         annotation : `Annotation` or `Score`
+#             Annotation
+#         f : file or str, optional
+#             Default is stdout.
+#         uri, modality : str, optional
+#             Override `annotation` attributes
 
-        """
+#         """
 
-        names = self.get_fields()
-        converters = self.get_converters()
+#         if uri is None:
+#             uri = annotation.uri
+#         if modality is None:
+#             modality = annotation.modality
 
-        # load whole file
-        df = pandas.read_table(path,
-                               delim_whitespace=True,
-                               header=None, names=names,
-                               comment=self.get_comment(),
-                               converters=converters,
-                               dtype={PYANNOTE_LABEL: object})
+#         if isinstance(f, file):
+#             self._append(annotation, f, uri, modality)
+#             f.flush()
+#         else:
+#             with open(f, 'w') as g:
+#                 self._append(annotation, g, uri, modality)
 
-        # remove comment lines
-        # (i.e. lines for which all fields are either None or NaN)
-        keep = [not all([pandas.isnull(r[n]) for n in names]) for _, r in df.iterrows()]
-        df = df[keep]
 
-        # add unique track numbers if they are not read from file
-        if PYANNOTE_TRACK not in names:
-            df[PYANNOTE_TRACK] = range(df.shape[0])
+# class BaseTextualAnnotationParser(BaseTextualParser):
 
-        # add 'segment' column build from start time & duration
-        df[PYANNOTE_SEGMENT] = [self.get_segment(row)
-                                for r, row in df.iterrows()]
+#     def read(self, path, uri=None, modality=None, **kwargs):
+#         """
 
-        # add uri column in case it does not exist
-        if PYANNOTE_URI not in df:
-            if uri is None:
-                raise ValueError('missing uri -- use uri=')
-            df[PYANNOTE_URI] = uri
+#         Parameters
+#         ----------
+#         path : str
 
-        # obtain list of resources
-        uris = list(df[PYANNOTE_URI].unique())
+#         modality : str, optional
+#             Force all entries to be considered as coming from this modality.
+#             Only taken into account when file format does not provide
+#             any field related to modality (e.g. .seg files)
 
-        # add modality column in case it does not exist
-        if PYANNOTE_MODALITY not in df:
-            if modality is None:
-                modality = self.get_default_modality()
-            df[PYANNOTE_MODALITY] = modality if modality is not None else ""
+#         """
 
-        # obtain list of modalities
-        modalities = list(df[PYANNOTE_MODALITY].unique())
+#         names = self.get_fields()
+#         converters = self.get_converters()
 
-        self._loaded = {}
+#         # load whole file
+#         df = pandas.read_table(path,
+#                                delim_whitespace=True,
+#                                header=None, names=names,
+#                                comment=self.get_comment(),
+#                                converters=converters,
+#                                dtype={PYANNOTE_LABEL: object})
 
-        # loop on resources
-        for uri in uris:
+#         # remove comment lines
+#         # (i.e. lines for which all fields are either None or NaN)
+#         keep = [not all([pandas.isnull(r[n]) for n in names]) for _, r in df.iterrows()]
+#         df = df[keep]
 
-            # filter based on resource
-            df_ = df[df[PYANNOTE_URI] == uri]
+#         # add unique track numbers if they are not read from file
+#         if PYANNOTE_TRACK not in names:
+#             df[PYANNOTE_TRACK] = range(df.shape[0])
 
-            # loop on modalities
-            for modality in modalities:
+#         # add 'segment' column build from start time & duration
+#         df[PYANNOTE_SEGMENT] = [self.get_segment(row)
+#                                 for r, row in df.iterrows()]
 
-                # filter based on modality
-                modality = modality if modality is not None else ""
-                df__ = df_[df_[PYANNOTE_MODALITY] == modality]
-                a = Annotation.from_df(df__, modality=modality, uri=uri)
-                self._loaded[uri, modality] = a
+#         # add uri column in case it does not exist
+#         if PYANNOTE_URI not in df:
+#             if uri is None:
+#                 raise ValueError('missing uri -- use uri=')
+#             df[PYANNOTE_URI] = uri
 
-        return self
+#         # obtain list of resources
+#         uris = list(df[PYANNOTE_URI].unique())
 
-    def no_match(self, uri=None, modality=None):
-        return Annotation(uri=uri, modality=modality)
+#         # add modality column in case it does not exist
+#         if PYANNOTE_MODALITY not in df:
+#             if modality is None:
+#                 modality = self.get_default_modality()
+#             df[PYANNOTE_MODALITY] = modality if modality is not None else ""
 
+#         # obtain list of modalities
+#         modalities = list(df[PYANNOTE_MODALITY].unique())
 
-class CustomTextualAnnotationParser(BaseTextualAnnotationParser):
-    def __init__(self, num_fields, uri=None, modality=None,
-                 label=None, track=None,
-                 start=None, end=None, duration=None,
-                 comment=None):
-        super(CustomTextualAnnotationParser, self).__init__()
+#         self._loaded = {}
 
-        self.num_fields = num_fields
-        self.fields = {}
+#         # loop on resources
+#         for uri in uris:
 
-        if isinstance(uri, int):
-            self.fields[uri] = PYANNOTE_URI
+#             # filter based on resource
+#             df_ = df[df[PYANNOTE_URI] == uri]
 
-        if isinstance(modality, int):
-            self.fields[modality] = PYANNOTE_MODALITY
+#             # loop on modalities
+#             for modality in modalities:
 
-        if isinstance(track, int):
-            self.fields[track] = PYANNOTE_TRACK
+#                 # filter based on modality
+#                 modality = modality if modality is not None else ""
+#                 df__ = df_[df_[PYANNOTE_MODALITY] == modality]
+#                 a = Annotation.from_df(df__, modality=modality, uri=uri)
+#                 self._loaded[uri, modality] = a
 
-        if isinstance(label, int):
-            self.fields[label] = PYANNOTE_LABEL
+#         return self
 
-        if isinstance(start, int):
-            self.fields[start] = 'start'
+#     def no_match(self, uri=None, modality=None):
+#         return Annotation(uri=uri, modality=modality)
 
-        if isinstance(end, int):
-            self.fields[end] = 'end'
 
-        if isinstance(duration, int):
-            self.fields[duration] = 'duration'
+# class CustomTextualAnnotationParser(BaseTextualAnnotationParser):
+#     def __init__(self, num_fields, uri=None, modality=None,
+#                  label=None, track=None,
+#                  start=None, end=None, duration=None,
+#                  comment=None):
+#         super(CustomTextualAnnotationParser, self).__init__()
 
-        self.start = start
-        self.end = end
-        self.duration = duration
+#         self.num_fields = num_fields
+#         self.fields = {}
 
-        self.comment = comment
+#         if isinstance(uri, int):
+#             self.fields[uri] = PYANNOTE_URI
 
-    def get_converters(self):
-        return None
+#         if isinstance(modality, int):
+#             self.fields[modality] = PYANNOTE_MODALITY
 
-    def get_default_modality(self):
-        return None
+#         if isinstance(track, int):
+#             self.fields[track] = PYANNOTE_TRACK
 
-    def get_comment(self):
-        return self.comment
+#         if isinstance(label, int):
+#             self.fields[label] = PYANNOTE_LABEL
 
-    def get_fields(self):
-        return [self.fields[i] if i in self.fields else i
-                for i in range(self.num_fields)]
+#         if isinstance(start, int):
+#             self.fields[start] = 'start'
 
-    def get_segment(self, row):
-        if self.end is not None:
-            return Segment(row['start'], row['end'])
-        elif self.duration is not None:
-            return Segment(row['start'], row['start'] + row['duration'])
-        else:
-            raise ValueError('do not know how to build a segment')
+#         if isinstance(end, int):
+#             self.fields[end] = 'end'
 
+#         if isinstance(duration, int):
+#             self.fields[duration] = 'duration'
 
-class BaseTextualScoresParser(BaseTextualParser):
+#         self.start = start
+#         self.end = end
+#         self.duration = duration
 
-    def read(self, path, modality=None, **kwargs):
+#         self.comment = comment
 
-        names = self.get_fields()
+#     def get_converters(self):
+#         return None
 
-        converters = self.get_converters()
-        if converters is None:
-            converters = {}
-        if PYANNOTE_LABEL not in converters:
-            converters[PYANNOTE_LABEL] = lambda x: x
-        if PYANNOTE_TRACK not in converters:
-            converters[PYANNOTE_TRACK] = lambda x: x
+#     def get_default_modality(self):
+#         return None
 
-        # load whole file
-        df = pandas.read_table(path,
-                               delim_whitespace=True,
-                               header=None, names=names,
-                               comment=self.get_comment(),
-                               converters=converters)
+#     def get_comment(self):
+#         return self.comment
 
-        # remove comment lines
-        # (i.e. lines for which all fields are either None or NaN)
-        keep = [not all([pandas.isnull(r[n]) for n in names]) for _, r in df.iterrows()]
-        df = df[keep]
+#     def get_fields(self):
+#         return [self.fields[i] if i in self.fields else i
+#                 for i in range(self.num_fields)]
 
-        # add 'segment' column build from start time & duration
-        df[PYANNOTE_SEGMENT] = [self.get_segment(row) for r, row in df.iterrows()]
+#     def get_segment(self, row):
+#         if self.end is not None:
+#             return Segment(row['start'], row['end'])
+#         elif self.duration is not None:
+#             return Segment(row['start'], row['start'] + row['duration'])
+#         else:
+#             raise ValueError('do not know how to build a segment')
 
-        # add unique track number per segment if they are not read from file
-        if PYANNOTE_TRACK not in names:
-            s2t = {s: t for t, s in enumerate(df[PYANNOTE_SEGMENT].unique())}
-            df[PYANNOTE_TRACK] = [s2t[s] for s in df[PYANNOTE_SEGMENT]]
 
-        # add modality column in case it does not exist
-        if PYANNOTE_MODALITY not in df:
-            if modality is None:
-                modality = self.get_default_modality()
-            df[PYANNOTE_MODALITY] = modality if modality is not None else ""
+# class BaseTextualScoresParser(BaseTextualParser):
 
-        # remove all columns but those six
-        df = df[[PYANNOTE_URI, PYANNOTE_MODALITY, PYANNOTE_SEGMENT, PYANNOTE_TRACK, PYANNOTE_LABEL, PYANNOTE_SCORE]]
+#     def read(self, path, modality=None, **kwargs):
 
-        # obtain list of resources
-        uris = list(df[PYANNOTE_URI].unique())
+#         names = self.get_fields()
 
-        # obtain list of modalities
-        modalities = list(df[PYANNOTE_MODALITY].unique())
+#         converters = self.get_converters()
+#         if converters is None:
+#             converters = {}
+#         if PYANNOTE_LABEL not in converters:
+#             converters[PYANNOTE_LABEL] = lambda x: x
+#         if PYANNOTE_TRACK not in converters:
+#             converters[PYANNOTE_TRACK] = lambda x: x
 
-        self._loaded = {}
+#         # load whole file
+#         df = pandas.read_table(path,
+#                                delim_whitespace=True,
+#                                header=None, names=names,
+#                                comment=self.get_comment(),
+#                                converters=converters)
 
-        # loop on resources
-        for uri in uris:
+#         # remove comment lines
+#         # (i.e. lines for which all fields are either None or NaN)
+#         keep = [not all([pandas.isnull(r[n]) for n in names]) for _, r in df.iterrows()]
+#         df = df[keep]
 
-            # filter based on resource
-            df_ = df[df[PYANNOTE_URI] == uri]
+#         # add 'segment' column build from start time & duration
+#         df[PYANNOTE_SEGMENT] = [self.get_segment(row) for r, row in df.iterrows()]
 
-            # loop on modalities
-            for modality in modalities:
+#         # add unique track number per segment if they are not read from file
+#         if PYANNOTE_TRACK not in names:
+#             s2t = {s: t for t, s in enumerate(df[PYANNOTE_SEGMENT].unique())}
+#             df[PYANNOTE_TRACK] = [s2t[s] for s in df[PYANNOTE_SEGMENT]]
 
-                # filter based on modality
-                df__ = df_[df_[PYANNOTE_MODALITY] == (modality if modality is not None else "")]
+#         # add modality column in case it does not exist
+#         if PYANNOTE_MODALITY not in df:
+#             if modality is None:
+#                 modality = self.get_default_modality()
+#             df[PYANNOTE_MODALITY] = modality if modality is not None else ""
 
-                s = Scores.from_df(df__, modality=modality, uri=uri)
+#         # remove all columns but those six
+#         df = df[[PYANNOTE_URI, PYANNOTE_MODALITY, PYANNOTE_SEGMENT, PYANNOTE_TRACK, PYANNOTE_LABEL, PYANNOTE_SCORE]]
 
-                self._loaded[uri, modality] = s
+#         # obtain list of resources
+#         uris = list(df[PYANNOTE_URI].unique())
 
-        return self
+#         # obtain list of modalities
+#         modalities = list(df[PYANNOTE_MODALITY].unique())
 
-    def no_match(self, uri=None, modality=None):
-        return Scores(uri=uri, modality=modality)
+#         self._loaded = {}
 
+#         # loop on resources
+#         for uri in uris:
 
-class BasePeriodicFeatureParser(object):
+#             # filter based on resource
+#             df_ = df[df[PYANNOTE_URI] == uri]
 
-    def __init__(self):
-        super(BasePeriodicFeatureParser, self).__init__()
+#             # loop on modalities
+#             for modality in modalities:
 
-    def _read_header(self, fp):
-        """
-        Read the header of a binary file.
+#                 # filter based on modality
+#                 df__ = df_[df_[PYANNOTE_MODALITY] == (modality if modality is not None else "")]
 
-        Parameters
-        ----------
-        fp : file
+#                 s = Scores.from_df(df__, modality=modality, uri=uri)
 
-        Returns
-        -------
-        dtype :
-            Feature vector type
-        sliding_window : :class:`pyannote.base.segment.SlidingWindow`
+#                 self._loaded[uri, modality] = s
 
-        count :
-            Number of feature vectors
+#         return self
 
-        """
-        raise NotImplementedError('')
+#     def no_match(self, uri=None, modality=None):
+#         return Scores(uri=uri, modality=modality)
 
-    def _read_data(self, fp, dtype, count=-1):
-        """
-        Construct an array from data in a binary file.
-
-        Parameters
-        ----------
-        file : file
-            Open file object
-        dtype : data-type
-            Data type of the returned array.
-            Used to determine the size and byte-order of the items in the file.
-        count : int
-            Number of items to read. ``-1`` means all items (i.e., the complete
-            file).
-
-        Returns
-        -------
-
-        """
-        raise NotImplementedError('')
-
-    def read(self, path, uri=None, **kwargs):
-        """
-
-        Parameters
-        ----------
-        path : str
-            path to binary feature file
-        uri : str, optional
-
-        Returns
-        -------
-        feature : :class:`pyannote.base.feature.SlidingWindowFeature`
-
-
-        """
-
-        # open binary file
-        fp = open(path, 'rb')
-        # read header
-        dtype, sliding_window, count = self._read_header(fp)
-        # read data
-        data = self._read_data(fp, dtype, count=count)
-
-        # if `uri` is not provided, use `path` instead
-        if uri is None:
-            uri = str(path)
-
-        # create feature object
-        feature = SlidingWindowFeature(data, sliding_window)
-
-        # close binary file
-        fp.close()
-
-        return feature
-
-
-class BaseBinaryPeriodicFeatureParser(BasePeriodicFeatureParser):
-
-    """
-    Base class for periodic feature stored in binary format.
-    """
-
-    def __init__(self):
-        super(BaseBinaryPeriodicFeatureParser, self).__init__()
-
-    def _read_data(self, fp, dtype, count=-1):
-        """
-        Construct an array from data in a binary file.
-
-        Parameters
-        ----------
-        file : file
-            Open file object
-        dtype : data-type
-            Data type of the returned array.
-            Used to determine the size and byte-order of the items in the file.
-        count : int
-            Number of items to read. ``-1`` means all items (i.e., the complete
-            file).
-
-        Returns
-        -------
-
-        """
-        return np.fromfile(fp, dtype=dtype, sep='', count=count)
-
-
-class BaseTextualPeriodicFeatureParser(BasePeriodicFeatureParser):
-
-    def __init__(self):
-        super(BaseTextualPeriodicFeatureParser, self).__init__()
-
-    def _read_data(self, fp, dtype, count=-1):
-        raise NotImplementedError('')
 
 if __name__ == "__main__":
     import doctest

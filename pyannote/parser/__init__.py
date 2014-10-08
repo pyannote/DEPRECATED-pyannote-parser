@@ -28,3 +28,52 @@ from __future__ import unicode_literals
 from ._version import get_versions
 __version__ = get_versions()['version']
 del get_versions
+
+import os
+import sys
+from pkg_resources import iter_entry_points
+
+__all__ = []
+
+parser_plugins = {}
+
+for o in iter_entry_points(group='pyannote.parser.plugin', name=None):
+
+    parser_name = o.name
+    parser_class = o.load()
+
+    for extension in parser_class.file_extensions():
+
+        if extension in parser_plugins:
+
+            raise ValueError('conflict')
+
+        parser_plugins[extension] = parser_class
+
+    setattr(sys.modules[__name__], parser_name, parser_class)
+    __all__.append(parser_name)
+
+
+class MagicParser(object):
+
+    def __init__(self, **kwargs):
+        super(MagicParser, self).__init__()
+        self.init_kwargs = kwargs
+
+    def read(self, path, **kwargs):
+
+        _, ext = os.path.splitext(path)
+        ext = ext[1:]  # .mdtm ==> mdtm
+
+        try:
+            parser_class = parser_plugins[ext]
+        except:
+            raise NotImplementedError('unknown extension {0}'.format(ext))
+
+        parser = parser_class(**self.init_kwargs)
+        parser.read(path, **kwargs)
+
+        return parser
+
+
+__all__.append(MagicParser)
