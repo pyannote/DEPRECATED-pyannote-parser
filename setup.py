@@ -60,6 +60,14 @@ setup(
     ],
     entry_points="""
         [pyannote.parser.plugin]
+        LSTParser=pyannote.parser.generic.lst:LSTParser
+        JSONParser=pyannote.parser.generic.json:JSONParser
+        PKLParser=pyannote.parser.generic.pkl:PKLParser
         MDTMParser=pyannote.parser.annotation.mdtm:MDTMParser
+        REPEREParser=pyannote.parser.annotation.repere:REPEREParser
+        REPEREScoresParser=pyannote.parser.scores.repere:REPEREScoresParser
+        UEMParser=pyannote.parser.timeline.uem:UEMParser
+        SRTParser=pyannote.parser.transcription.srt:SRTParser
+        CTMParser=pyannote.parser.transcription.ctm:CTMParser
     """
 )

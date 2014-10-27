@@ -28,23 +28,22 @@
 
 from __future__ import unicode_literals
 
-"""
-SRT (SubRip Text) is a file format to specify subtitles for a recorded video.
-
-References
-----------
-http://en.wikipedia.org/wiki/SubRip
-"""
-
 
 import pysrt
 import itertools
 import numpy as np
 from pyannote.core import Transcription, T
 
+from pyannote.parser.base import Parser
 
-class SRTParser(object):
-    """SRT file parser
+
+class SRTParser(Parser):
+    """
+    SRT (SubRip Text) is a subtitles file format
+
+    References
+    ----------
+    http://en.wikipedia.org/wiki/SubRip
 
     Parameters
     ----------
@@ -53,9 +52,11 @@ class SRTParser(object):
     duration : bool, optional
         Estimate duration of multiple lines based on string length.
         Defaults to False.
-
-
     """
+
+    @classmethod
+    def file_extensions(cls):
+        return ['srt']
 
     def __init__(self, split=False, duration=False):
         super(SRTParser, self).__init__()
@@ -105,7 +106,7 @@ class SRTParser(object):
             yield line, start_time, end_time
             start_time = end_time
 
-    def read(self, path, uri=None):
+    def read(self, path, uri=None, **kwargs):
         """Load .srt file as transcription
 
         Parameters
@@ -153,4 +154,9 @@ class SRTParser(object):
 
             prev_end = end
 
-        return transcription
+        self._loaded = {(uri, 'subtitle'): transcription}
+
+        return self
+
+    def empty(self, uri=None, modality=None, **kwargs):
+        raise NotImplementedError()

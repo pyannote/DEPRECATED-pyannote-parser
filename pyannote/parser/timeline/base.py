@@ -29,14 +29,13 @@
 from abc import abstractmethod
 from pyannote.parser.base import Parser
 
-from pyannote.core import Annotation
-from pyannote.core import PYANNOTE_URI, PYANNOTE_MODALITY, \
-    PYANNOTE_SEGMENT, PYANNOTE_TRACK, PYANNOTE_LABEL
+from pyannote.core import Timeline
+from pyannote.core import PYANNOTE_URI, PYANNOTE_SEGMENT
 
 import pandas
 
 
-class AnnotationParser(Parser):
+class TimelineParser(Parser):
 
     @abstractmethod
     def fields(self):
@@ -52,37 +51,20 @@ class AnnotationParser(Parser):
     def comment(self):
         return None
 
-    def read(self, path, uri=None, modality=None, **kwargs):
-        """
-
-        Parameters
-        ----------
-        path : str
-
-        modality : str, optional
-            Force all entries to be considered as coming from this modality.
-            Only taken into account when file format does not provide
-            any field related to modality (e.g. .seg files)
-
-        """
+    def read(self, path, uri=None, **kwargs):
 
         # load whole file
         df = pandas.read_table(path,
                                delim_whitespace=True,
                                header=None, names=self.fields(),
                                comment=self.comment(),
-                               converters=self.converters(),
-                               dtype={PYANNOTE_LABEL: object})
+                               converters=self.converters())
 
         # remove comment lines
         # (i.e. lines for which all fields are either None or NaN)
         keep = [not all([pandas.isnull(r[n]) for n in self.fields()])
                 for _, r in df.iterrows()]
         df = df[keep]
-
-        # add unique track numbers if they are not read from file
-        if PYANNOTE_TRACK not in self.fields():
-            df[PYANNOTE_TRACK] = range(df.shape[0])
 
         # add 'segment' column build from start time & duration
         df[PYANNOTE_SEGMENT] = [self.get_segment(row)
@@ -97,15 +79,6 @@ class AnnotationParser(Parser):
         # obtain list of resources
         uris = list(df[PYANNOTE_URI].unique())
 
-        # add modality column in case it does not exist
-        if PYANNOTE_MODALITY not in df:
-            if modality is None:
-                raise ValueError('missing modality -- use modality=')
-            df[PYANNOTE_MODALITY] = modality if modality is not None else ""
-
-        # obtain list of modalities
-        modalities = list(df[PYANNOTE_MODALITY].unique())
-
         self._loaded = {}
 
         # loop on resources
@@ -114,46 +87,38 @@ class AnnotationParser(Parser):
             # filter based on resource
             df_ = df[df[PYANNOTE_URI] == uri]
 
-            # loop on modalities
-            for modality in modalities:
-
-                # filter based on modality
-                modality = modality if modality is not None else ""
-                df__ = df_[df_[PYANNOTE_MODALITY] == modality]
-                a = Annotation.from_df(df__, modality=modality, uri=uri)
-                self._loaded[uri, modality] = a
+            t = Timeline.from_df(df_, uri=uri)
+            self._loaded[uri, None] = t
 
         return self
 
-    def empty(self, uri=None, modality=None, **kwargs):
-        return Annotation(uri=uri, modality=modality)
+    def empty(self, uri=None, **kwargs):
+        return Timeline(uri=uri)
 
-    def write(self, annotation, f=None, uri=None, modality=None):
+    def write(self, timeline, f=None, uri=None, **kwargs):
         """
 
         Parameters
         ----------
-        annotation : `Annotation` or `Score`
-            Annotation
+        timeline : `Timeline`
+            Timeline
         f : file or str, optional
             Default is stdout.
         uri, modality : str, optional
-            Override `annotation` attributes
+            Override `timeline` attributes
 
         """
 
         if uri is None:
-            uri = annotation.uri
-        if modality is None:
-            modality = annotation.modality
+            uri = timeline.uri
 
         if isinstance(f, file):
-            self._append(annotation, f, uri, modality)
+            self._append(timeline, f, uri)
             f.flush()
 
         else:
             with open(f, 'w') as g:
-                self._append(annotation, g, uri, modality)
+                self._append(timeline, g, uri)
 
-    def _append(self, annotation, f, uri, modality):
+    def _append(self, timeline, f, uri):
         raise NotImplementedError('')

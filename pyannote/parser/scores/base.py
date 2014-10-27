@@ -29,14 +29,14 @@
 from abc import abstractmethod
 from pyannote.parser.base import Parser
 
-from pyannote.core import Annotation
+from pyannote.core import Scores
 from pyannote.core import PYANNOTE_URI, PYANNOTE_MODALITY, \
-    PYANNOTE_SEGMENT, PYANNOTE_TRACK, PYANNOTE_LABEL
+    PYANNOTE_SEGMENT, PYANNOTE_TRACK, PYANNOTE_LABEL, PYANNOTE_SCORE
 
 import pandas
 
 
-class AnnotationParser(Parser):
+class ScoresParser(Parser):
 
     @abstractmethod
     def fields(self):
@@ -72,7 +72,8 @@ class AnnotationParser(Parser):
                                header=None, names=self.fields(),
                                comment=self.comment(),
                                converters=self.converters(),
-                               dtype={PYANNOTE_LABEL: object})
+                               dtype={PYANNOTE_LABEL: object,
+                                      PYANNOTE_SCORE: float})
 
         # remove comment lines
         # (i.e. lines for which all fields are either None or NaN)
@@ -120,40 +121,39 @@ class AnnotationParser(Parser):
                 # filter based on modality
                 modality = modality if modality is not None else ""
                 df__ = df_[df_[PYANNOTE_MODALITY] == modality]
-                a = Annotation.from_df(df__, modality=modality, uri=uri)
+                a = Scores.from_df(df__, modality=modality, uri=uri)
                 self._loaded[uri, modality] = a
 
         return self
 
     def empty(self, uri=None, modality=None, **kwargs):
-        return Annotation(uri=uri, modality=modality)
+        return Scores(uri=uri, modality=modality)
 
-    def write(self, annotation, f=None, uri=None, modality=None):
+    def write(self, scores, f=None, uri=None, modality=None):
         """
 
         Parameters
         ----------
-        annotation : `Annotation` or `Score`
-            Annotation
+        scores : `Score`
         f : file or str, optional
             Default is stdout.
         uri, modality : str, optional
-            Override `annotation` attributes
+            Override `scores` attributes
 
         """
 
         if uri is None:
-            uri = annotation.uri
+            uri = scores.uri
         if modality is None:
-            modality = annotation.modality
+            modality = scores.modality
 
         if isinstance(f, file):
-            self._append(annotation, f, uri, modality)
+            self._append(scores, f, uri, modality)
             f.flush()
 
         else:
             with open(f, 'w') as g:
-                self._append(annotation, g, uri, modality)
+                self._append(scores, g, uri, modality)
 
-    def _append(self, annotation, f, uri, modality):
+    def _append(self, scores, f, uri, modality):
         raise NotImplementedError('')

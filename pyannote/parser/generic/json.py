@@ -23,34 +23,28 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-# AUTHORS: Hervé BREDIN - http://herve.niderb.fr
+# Authors
+# Hervé BREDIN (http://herve.niderb.fr)
 
-import pickle
+from __future__ import unicode_literals
+
+from pyannote.parser.base import Parser
+import pyannote.core.json
 
 
-class PKLParser(object):
+class JSONParser(Parser):
+    """PyAnnote JSON file format"""
 
-    def read(self, path):
-        """
+    @classmethod
+    def file_extensions(cls):
+        return ['json']
 
-        Parameters
-        ----------
-        path : str
-            Path to pickled file.
-
-        Returns
-        -------
-        data : object
-            Content of pickled file.
-        """
-
-        with open(path, 'rb') as f:
-            data = pickle.load(f)
-
-        self._loaded = data
-
+    def read(self, path, **kwargs):
+        self._loaded = pyannote.core.json.load(path)
         return self
+
+    def empty(self, uri=None, modality=None, **kwargs):
+        raise NotImplementedError()
 
     def __call__(self, **kwargs):
         return self._loaded
-
