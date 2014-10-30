@@ -3,7 +3,7 @@
 
 # The MIT License (MIT)
 
-# Copyright (c) 2012-2014 CNRS (Hervé BREDIN - http://herve.niderb.fr)
+# Copyright (c) 2014 CNRS
 
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -15,7 +15,7 @@
 # The above copyright notice and this permission notice shall be included in
 # all copies or substantial portions of the Software.
 
-# THE SOFTWARE S PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 # IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 # FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
 # AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
@@ -23,41 +23,39 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
+# AUTHORS
+# Hervé BREDIN - http://herve.niderb.fr
+
 from __future__ import unicode_literals
 
-"""
-Support for UEM file format
-
-UEM (Unpartitioned Evaluation Map) is a file format used
-to create an index specifying time regions within a recorded
-waveform.
-
-References
-----------
-http://www.itl.nist.gov/iad/mig/tests/rt/
-"""
-
 from pyannote.core import Segment
-from base import BaseTextualTimelineParser
+from pyannote.core import PYANNOTE_URI
+
+from base import TimelineParser
 
 
-class UEMParser(BaseTextualTimelineParser):
+class UEMParser(TimelineParser):
+    """UEM (Unpartitioned Evaluation Map) is a file format used to create
+    an index specifying time regions within a recorded waveform.
 
-    def _comment(self, line):
-        return line[:2] == ';;'
+    http://www.itl.nist.gov/iad/mig/tests/rt/
+    """
 
-    def _parse(self, line):
+    @classmethod
+    def file_extensions(cls):
+        return ['uem']
 
-        tokens = line.split()
-        # uri channel start end
+    def fields(self):
+        return [PYANNOTE_URI,
+                '1',
+                'start',
+                'end']
 
-        uri = str(tokens[0])
-        #channel = tokens[1]
-        start_time = float(tokens[2])
-        end_time = float(tokens[3])
-        segment = Segment(start=start_time, end=end_time)
+    def comment(self):
+        return ';'
 
-        return segment, uri
+    def get_segment(self, row):
+        return Segment(row['start'], row['end'])
 
     def _append(self, timeline, f, uri):
 

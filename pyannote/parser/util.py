@@ -26,16 +26,12 @@
 # AUTHORS: Hervé BREDIN - http://herve.niderb.fr
 
 import itertools
-from pyannote.parser.json import JSONParser
 from pyannote.parser.lst import LSTParser
-from pyannote.parser.mdtm import MDTMParser
-from pyannote.parser.repere import REPEREParser
-from pyannote.parser.uem import UEMParser
-from pyannote.parser.pkl import PKLParser
+from pyannote.parser import MagicParser
 
 
 class CoParser(object):
-    """Utility class to iterate over several file in uri-sync.
+    """Utility class to uri-iterate over several file in sync.
 
     Parameters
     ----------
@@ -54,26 +50,9 @@ class CoParser(object):
 
     """
 
-    # TODO build this list automatically
-    # (in a plugin-like fashion)
-    supported = {
-        '.json': JSONParser,
-        '.mdtm': MDTMParser,
-        '.repere': REPEREParser,
-        '.uem': UEMParser,
-        '.pkl': PKLParser,
-    }
-
-    def guess_parser(self, path):
-
-        import os
-        _, extension = os.path.splitext(path)
-        parser = CoParser.supported[extension]
-        return parser
-
     def _make_load(self, value, key=None, uris=None):
 
-        parser = self.guess_parser(value)
+        parser = MagicParser.guess_parser(value)
 
         # mono-uri file
         if '{uri' in value:

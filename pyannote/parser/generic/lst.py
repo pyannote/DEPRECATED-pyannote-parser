@@ -25,15 +25,25 @@
 
 # AUTHORS: Hervé BREDIN - http://herve.niderb.fr
 
-"""
-LST (list) is a dummy file format to specify a list of "things"
-(one thing per line)
-"""
+from __future__ import unicode_literals
+
+from pyannote.parser.base import Parser
 
 
-class LSTParser(object):
+class LSTParser(Parser):
+    """
+    LST (list) is a dummy file format to specify a list of "things"
+    (one thing per line)
+    """
 
-    def read(self, path):
+    @classmethod
+    def file_extensions(cls):
+        return ['lst']
+
+    def empty(self, **kwargs):
+        raise NotImplementedError()
+
+    def read(self, path, **kwargs):
         """
 
         Parameters
@@ -50,4 +60,9 @@ class LSTParser(object):
         with open(path, 'r') as f:
             lines = [line.strip() for line in f]
 
+        self._loaded = lines
+
         return lines
+
+    def __call__(self, **kwargs):
+        return self._loaded

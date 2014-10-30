@@ -3,7 +3,7 @@
 
 # The MIT License (MIT)
 
-# Copyright (c) 2012-2014 CNRS (Hervé BREDIN - http://herve.niderb.fr)
+# Copyright (c) 2012-2014 CNRS
 
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -23,55 +23,44 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
+# AUTHORS
+# Hervé BREDIN - http://herve.niderb.fr
+
 from __future__ import unicode_literals
 
-"""
-Support for MDTM file format
+from pyannote.core import Segment
+from pyannote.core import PYANNOTE_URI, PYANNOTE_MODALITY, PYANNOTE_LABEL
 
-MDTM (Meta Data Time-Mark) is a file format used to specify label
-for time regions within a recorded waveform.
-"""
+from base import ScoresParser
 
-from pyannote.core import Segment, \
-    PYANNOTE_URI, PYANNOTE_MODALITY, PYANNOTE_LABEL
-from base import BaseTextualFormat, BaseTextualAnnotationParser
+from pyannote.core import PYANNOTE_SCORE
 
 
-class MDTMMixin(BaseTextualFormat):
+class REPEREScoresParser(ScoresParser):
 
-    CHANNEL = 'channel'
-    START = 'start'
-    DURATION = 'duration'
-    CONFIDENCE = 'confidence'
-    GENDER = 'gender'
+    @classmethod
+    def file_extensions(cls):
+        return ['reperes']
 
-    def get_comment(self):
-        return ';'
-
-    def get_fields(self):
+    def fields(self):
         return [PYANNOTE_URI,
-                self.CHANNEL,
-                self.START,
-                self.DURATION,
+                'start',
+                'end',
                 PYANNOTE_MODALITY,
-                self.CONFIDENCE,
-                self.GENDER,
-                PYANNOTE_LABEL]
+                PYANNOTE_LABEL,
+                PYANNOTE_SCORE]
 
     def get_segment(self, row):
-        return Segment(row[self.START], row[self.START] + row[self.DURATION])
+        return Segment(row['start'], row['end'])
 
-    def _append(self, annotation, f, uri, modality):
+    def _append(self, scores, f, uri, modality):
 
         try:
-            format = '%s 1 %%g %%g %s NA %%s %%s\n' % (uri, modality)
-            for segment, track, label in annotation.itertracks(label=True):
-                f.write(format % (segment.start, segment.duration,
-                                  track, label))
+            format = '%s %%g %%g %s %%s %%g\n' % (uri, modality)
+            for segment, track, label, value in scores.itervalues():
+                f.write(format % (segment.start, segment.end,
+                                  label, value))
+
         except Exception, e:
             print "Error @ %s%s %s %s" % (uri, segment, track, label)
             raise e
-
-
-class MDTMParser(BaseTextualAnnotationParser, MDTMMixin):
-    pass

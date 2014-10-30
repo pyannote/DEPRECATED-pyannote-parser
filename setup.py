@@ -37,7 +37,7 @@ setup(
     namespace_packages=['pyannote'],
     packages=find_packages(),
     install_requires=[
-        'pyannote.core >= 0.1',
+        'pyannote.core >= 0.2',
         'pysrt >= 1.0.1'
     ],
     # versioneer
@@ -58,4 +58,16 @@ setup(
         "Programming Language :: Python :: 2.7",
         "Topic :: Scientific/Engineering"
     ],
+    entry_points="""
+        [pyannote.parser.plugin]
+        LSTParser=pyannote.parser.generic.lst:LSTParser
+        JSONParser=pyannote.parser.generic.json:JSONParser
+        PKLParser=pyannote.parser.generic.pkl:PKLParser
+        MDTMParser=pyannote.parser.annotation.mdtm:MDTMParser
+        REPEREParser=pyannote.parser.annotation.repere:REPEREParser
+        REPEREScoresParser=pyannote.parser.scores.repere:REPEREScoresParser
+        UEMParser=pyannote.parser.timeline.uem:UEMParser
+        SRTParser=pyannote.parser.transcription.srt:SRTParser
+        CTMParser=pyannote.parser.transcription.ctm:CTMParser
+    """
 )
