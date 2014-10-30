@@ -1,4 +1,4 @@
-### Version 0.2 (2014-10-30)
+### Version 0.2.1 (2014-10-30)
 
   - BREAKING CHANGES: plugins!
   - feat: smart MagicParser
