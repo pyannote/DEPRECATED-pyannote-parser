@@ -38,7 +38,8 @@ setup(
     packages=find_packages(),
     install_requires=[
         'pyannote.core >= 0.2.1',
-        'pysrt >= 1.0.1'
+        'pysrt >= 1.0.1',
+        'docopt >= 0.6.2',
     ],
     # versioneer
     version=versioneer.get_version(),
