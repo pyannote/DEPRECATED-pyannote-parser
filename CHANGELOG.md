@@ -1,3 +1,7 @@
+### Version 0.2.2 (2014-11-13)
+
+  - fix: add missing 'uris' and 'modalities' properties
+
 ### Version 0.2.1 (2014-10-30)
 
   - BREAKING CHANGES: plugins!

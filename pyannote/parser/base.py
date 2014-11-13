@@ -54,6 +54,16 @@ class Parser(object):
     def empty(self, uri=None, modality=None, **kwargs):
         pass
 
+    def __get_uris(self):
+        return sorted(set([v for (v, m) in self._loaded]))
+    uris = property(fget=__get_uris)
+    """"""
+
+    def __get_modalities(self):
+        return sorted(set([m for (v, m) in self._loaded]))
+    modalities = property(fget=__get_modalities)
+    """"""
+
     def __call__(self, uri=None, modality=None, **kwargs):
 
         match = dict(self._loaded)
