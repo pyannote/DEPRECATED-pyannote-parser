@@ -187,5 +187,8 @@ class CTMParser(Parser, IterLinesMixin):
 
         return self
 
+    def empty(self, uri=None, modality=None, **kwargs):
+        return Transcription(uri=uri, modality=modality)
+
     def __call__(self, **kwargs):
         return self._loaded
