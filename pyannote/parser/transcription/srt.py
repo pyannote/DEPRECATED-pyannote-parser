@@ -159,4 +159,4 @@ class SRTParser(Parser):
         return self
 
     def empty(self, uri=None, modality=None, **kwargs):
-        raise NotImplementedError()
+        return Transcription(uri=uri, modality='subtitle')
