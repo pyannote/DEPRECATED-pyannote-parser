@@ -1,3 +1,6 @@
+### Version 0.2.4 (2014-11-17)
+
+  - fix: CoParser
 
 ### Version 0.2.3 (2014-11-14)
 
