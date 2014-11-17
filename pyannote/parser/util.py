@@ -26,7 +26,7 @@
 # AUTHORS: Hervé BREDIN - http://herve.niderb.fr
 
 import itertools
-from pyannote.parser.lst import LSTParser
+from pyannote.parser import LSTParser
 from pyannote.parser import MagicParser
 
 
