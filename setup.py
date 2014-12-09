@@ -37,8 +37,8 @@ setup(
     namespace_packages=['pyannote'],
     packages=find_packages(),
     install_requires=[
-        'pyannote.core >= 0.2.3',
-        'pysrt >= 1.0.1'
+        'pyannote.core >= 0.3',
+        'pysrt >= 1.0.1',
     ],
     # versioneer
     version=versioneer.get_version(),
