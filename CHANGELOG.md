@@ -1,3 +1,8 @@
+### Version 0.3 (2014-12-09)
+
+  - setup: switch to pyannote.core 0.3
+  - feat: parser .hyp files with REPEREParser
+
 ### Version 0.2.4 (2014-11-17)
 
   - fix: CoParser
