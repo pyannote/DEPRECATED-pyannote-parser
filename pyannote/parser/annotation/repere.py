@@ -86,7 +86,7 @@ class REPEREParser(AnnotationParser):
 
     @classmethod
     def file_extensions(cls):
-        return ['repere']
+        return ['repere', 'hyp']
 
     def fields(self):
         return [PYANNOTE_URI,
