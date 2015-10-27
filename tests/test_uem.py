@@ -26,31 +26,38 @@
 # AUTHORS
 # Hervé BREDIN - http://herve.niderb.fr
 
-from __future__ import unicode_literals
+from __future__ import print_function
+
+import pytest
+from pyannote.core import Segment
+from pyannote.parser import UEMParser
+import tempfile
+import os
+
+SAMPLE = """uri1 1 1.0 3.5
+uri1 1 3.0 7.5
+uri1 1 6.0 9.0
+"""
 
 
-import pickle
+@pytest.fixture
+def sample(request):
 
-from pyannote.parser.base import Parser
+    _, filename = tempfile.mkstemp()
+    with open(filename, 'w') as f:
+        f.write(SAMPLE)
+
+    def delete():
+        os.remove(filename)
+    request.addfinalizer(delete)
+
+    return filename
 
 
-class PKLParser(Parser):
-
-    @classmethod
-    def file_extensions(cls):
-        return ['pkl']
-
-    def read(self, path, **kwargs):
-
-        with open(path, 'rb') as f:
-            data = pickle.load(f)
-
-        self._loaded = data
-
-        return self
-
-    def empty(self, uri=None, modality=None, **kwargs):
-        raise NotImplementedError()
-
-    def __call__(self, **kwargs):
-        return self._loaded
+def test_load(sample):
+    parser = UEMParser()
+    timelines = parser.read(sample)
+    timeline1 = timelines(uri="uri1")
+    assert list(timeline1) == [Segment(1, 3.5),
+                               Segment(3, 7.5),
+                               Segment(6, 9)]

@@ -3,7 +3,7 @@
 
 # The MIT License (MIT)
 
-# Copyright (c) 2012-2014 CNRS (Hervé BREDIN - http://herve.niderb.fr)
+# Copyright (c) 2012-2015 CNRS
 
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -15,7 +15,7 @@
 # The above copyright notice and this permission notice shall be included in
 # all copies or substantial portions of the Software.
 
-# THE SOFTWARE S PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 # IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 # FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
 # AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
@@ -23,17 +23,12 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
+# AUTHORS
+# Hervé BREDIN - http://herve.niderb.fr
+
 from __future__ import unicode_literals
 
-# import sys
-# import pandas
-# import numpy as np
-# from pyannote.core import Segment, Timeline, Annotation, Scores
-# from pyannote.core.feature import SlidingWindowFeature
-# from pyannote.core import PYANNOTE_URI, PYANNOTE_MODALITY, \
-#     PYANNOTE_SEGMENT, PYANNOTE_TRACK, PYANNOTE_LABEL, PYANNOTE_SCORE
-
-
+import six
 from abc import ABCMeta, abstractmethod
 
 
@@ -71,20 +66,20 @@ class Parser(object):
         # filter out all annotations
         # but the ones for the requested resource
         if uri is not None:
-            match = {(v, m): ann for (v, m), ann in match.iteritems()
+            match = {(v, m): ann for (v, m), ann in six.iteritems(match)
                      if v == uri}
 
         # filter out all remaining annotations
         # but the ones for the requested modality
         if modality is not None:
-            match = {(v, m): ann for (v, m), ann in match.iteritems()
+            match = {(v, m): ann for (v, m), ann in six.iteritems(match)
                      if m == modality}
 
         if len(match) == 0:
             A = self.empty(uri=uri, modality=modality, **kwargs)
 
         elif len(match) == 1:
-            A = match.values()[0]
+            A = list(match.values())[0]
 
         else:
             msg = 'Found more than one matching annotation: %s'

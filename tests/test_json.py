@@ -3,7 +3,7 @@
 
 # The MIT License (MIT)
 
-# Copyright (c) 2012-2015 CNRS
+# Copyright (c) 2014-2015 CNRS
 
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -26,42 +26,66 @@
 # AUTHORS
 # Hervé BREDIN - http://herve.niderb.fr
 
-from __future__ import unicode_literals
 from __future__ import print_function
 
+import pytest
 from pyannote.core import Segment
-from pyannote.core import PYANNOTE_URI, PYANNOTE_MODALITY, PYANNOTE_LABEL
+from pyannote.parser import JSONParser
+import tempfile
+import os
 
-from .base import ScoresParser
+SAMPLE = '''{
+  "pyannote": "Annotation",
+  "content": [
+    {
+      "segment": {
+        "start": 1,
+        "end": 3.5
+      },
+      "track": "track1",
+      "label": "alice"
+    },
+    {
+      "segment": {
+        "start": 3,
+        "end": 7.5
+      },
+      "track": "track2",
+      "label": "barbara"
+    },
+    {
+      "segment": {
+        "start": 6,
+        "end": 9
+      },
+      "track": "track3",
+      "label": "chris"
+    }
+  ],
+  "uri": "uri1",
+  "modality": "speech"
+}'''
 
-from pyannote.core import PYANNOTE_SCORE
+
+@pytest.fixture
+def sample(request):
+
+    _, filename = tempfile.mkstemp()
+    with open(filename, 'w') as f:
+        f.write(SAMPLE)
+
+    def delete():
+        os.remove(filename)
+    request.addfinalizer(delete)
+
+    return filename
 
 
-class REPEREScoresParser(ScoresParser):
-
-    @classmethod
-    def file_extensions(cls):
-        return ['reperes']
-
-    def fields(self):
-        return [PYANNOTE_URI,
-                'start',
-                'end',
-                PYANNOTE_MODALITY,
-                PYANNOTE_LABEL,
-                PYANNOTE_SCORE]
-
-    def get_segment(self, row):
-        return Segment(row['start'], row['end'])
-
-    def _append(self, scores, f, uri, modality):
-
-        try:
-            format = '%s %%g %%g %s %%s %%g\n' % (uri, modality)
-            for segment, track, label, value in scores.itervalues():
-                f.write(format % (segment.start, segment.end,
-                                  label, value))
-
-        except Exception as e:
-            print("Error @ %s%s %s %s" % (uri, segment, track, label))
-            raise e
+def test_load(sample):
+    parser = JSONParser()
+    annotations = parser.read(sample)
+    speech1 = annotations(uri="uri1", modality="speech")
+    assert list(speech1.itertracks(label=True)) == [
+        (Segment(1, 3.5), 'track1', 'alice'),
+        (Segment(3, 7.5), 'track2', 'barbara'),
+        (Segment(6, 9), 'track3', 'chris') ]

@@ -3,7 +3,7 @@
 
 # The MIT License (MIT)
 
-# Copyright (c) 2014 CNRS
+# Copyright (c) 2014-2015 CNRS
 
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -23,16 +23,17 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-# Authors
-# Hervé BREDIN (http://herve.niderb.fr)
+# AUTHORS
+# Hervé BREDIN - http://herve.niderb.fr
 
 from __future__ import unicode_literals
 
 
+import six.moves
 import pysrt
 import itertools
 import numpy as np
-from pyannote.core import Transcription, T
+from pyannote.core import Transcription, T, TStart, TEnd
 
 from pyannote.parser.base import Parser
 
@@ -102,7 +103,7 @@ class SRTParser(Parser):
             end_times = [T() for line in lines[:-1]] + [end]
 
         start_time = start
-        for line, end_time in itertools.izip(lines, end_times):
+        for line, end_time in six.moves.zip(lines, end_times):
             yield line, start_time, end_time
             start_time = end_time
 
@@ -126,7 +127,7 @@ class SRTParser(Parser):
         transcription = Transcription(uri=uri)
 
         # keep track of end of previous subtitle
-        prev_end = None
+        prev_end = TStart
 
         # loop on each subtitle in chronological order
         for subtitle in subtitles:
@@ -135,15 +136,14 @@ class SRTParser(Parser):
             start = self._timeInSeconds(subtitle.start)
             end = self._timeInSeconds(subtitle.end)
 
-            if prev_end:
-                # connect current subtitle with previous one
-                # if there is a gap between them
-                if start > prev_end:
-                    transcription.add_edge(prev_end, start)
-                # raise an error in case current subtitle starts
-                # before previous subtitle ends
-                elif start < prev_end:
-                    raise ValueError('Non-chronological subtitles')
+            # connect current subtitle with previous one
+            # if there is a gap between them
+            if start > prev_end:
+                transcription.add_edge(prev_end, start)
+            # raise an error in case current subtitle starts
+            # before previous subtitle ends
+            elif start < prev_end:
+                raise ValueError('Non-chronological subtitles')
 
             # split subtitle in multiple speaker lines (only if needed)
             lines = self._split(subtitle.text)
@@ -153,6 +153,8 @@ class SRTParser(Parser):
                 transcription.add_edge(start_t, end_t, subtitle=line)
 
             prev_end = end
+
+        transcription.add_edge(end, TEnd)
 
         self._loaded = {(uri, 'subtitle'): transcription}
 

@@ -3,7 +3,7 @@
 
 # The MIT License (MIT)
 
-# Copyright (c) 2014 CNRS
+# Copyright (c) 2014-2015 CNRS
 
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -27,11 +27,12 @@
 # Hervé BREDIN - http://herve.niderb.fr
 
 from __future__ import unicode_literals
+from __future__ import print_function
 
 from pyannote.core import Segment
 from pyannote.core import PYANNOTE_URI, PYANNOTE_MODALITY, PYANNOTE_LABEL
 
-from base import AnnotationParser
+from .base import AnnotationParser
 
 
 class MDTMParser(AnnotationParser):
@@ -67,6 +68,6 @@ class MDTMParser(AnnotationParser):
             for segment, track, label in annotation.itertracks(label=True):
                 f.write(format % (segment.start, segment.duration,
                                   track, label))
-        except Exception, e:
-            print "Error @ %s%s %s %s" % (uri, segment, track, label)
+        except Exception as e:
+            print("Error @ %s%s %s %s" % (uri, segment, track, label))
             raise e

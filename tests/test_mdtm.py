@@ -26,31 +26,39 @@
 # AUTHORS
 # Hervé BREDIN - http://herve.niderb.fr
 
-from __future__ import unicode_literals
+from __future__ import print_function
+
+import pytest
+from pyannote.core import Segment
+from pyannote.parser import MDTMParser
+import tempfile
+import os
+
+SAMPLE = """uri1 channel 1.0 2.5 speech 0.9 female alice
+uri1 channel 3.0 4.5 speech 0.7 female barbara
+uri1 channel 6.0 3.0 speech 0.8 male chris
+"""
 
 
-import pickle
+@pytest.fixture
+def sample(request):
 
-from pyannote.parser.base import Parser
+    _, filename = tempfile.mkstemp()
+    with open(filename, 'w') as f:
+        f.write(SAMPLE)
+
+    def delete():
+        os.remove(filename)
+    request.addfinalizer(delete)
+
+    return filename
 
 
-class PKLParser(Parser):
-
-    @classmethod
-    def file_extensions(cls):
-        return ['pkl']
-
-    def read(self, path, **kwargs):
-
-        with open(path, 'rb') as f:
-            data = pickle.load(f)
-
-        self._loaded = data
-
-        return self
-
-    def empty(self, uri=None, modality=None, **kwargs):
-        raise NotImplementedError()
-
-    def __call__(self, **kwargs):
-        return self._loaded
+def test_load(sample):
+    parser = MDTMParser()
+    annotations = parser.read(sample)
+    speech1 = annotations(uri="uri1", modality="speech")
+    assert list(speech1.itertracks(label=True)) == [
+        (Segment(1, 3.5), 0, 'alice'),
+        (Segment(3, 7.5), 1, 'barbara'),
+        (Segment(6, 9), 2, 'chris') ]

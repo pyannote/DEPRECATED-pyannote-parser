@@ -3,7 +3,7 @@
 
 # The MIT License (MIT)
 
-# Copyright (c) 2014 CNRS
+# Copyright (c) 2014-2015 CNRS
 
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -31,7 +31,7 @@ from __future__ import unicode_literals
 from pyannote.core import Segment
 from pyannote.core import PYANNOTE_URI
 
-from base import TimelineParser
+from .base import TimelineParser
 
 
 class UEMParser(TimelineParser):

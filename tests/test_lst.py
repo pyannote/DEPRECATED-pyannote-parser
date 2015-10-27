@@ -26,31 +26,33 @@
 # AUTHORS
 # Hervé BREDIN - http://herve.niderb.fr
 
-from __future__ import unicode_literals
+from __future__ import print_function
+
+import pytest
+from pyannote.parser import LSTParser
+import tempfile
+import os
+
+SAMPLE = """item1
+item2
+item3
+"""
 
 
-import pickle
+@pytest.fixture
+def sample(request):
 
-from pyannote.parser.base import Parser
+    _, filename = tempfile.mkstemp()
+    with open(filename, 'w') as f:
+        f.write(SAMPLE)
+
+    def delete():
+        os.remove(filename)
+    request.addfinalizer(delete)
+
+    return filename
 
 
-class PKLParser(Parser):
-
-    @classmethod
-    def file_extensions(cls):
-        return ['pkl']
-
-    def read(self, path, **kwargs):
-
-        with open(path, 'rb') as f:
-            data = pickle.load(f)
-
-        self._loaded = data
-
-        return self
-
-    def empty(self, uri=None, modality=None, **kwargs):
-        raise NotImplementedError()
-
-    def __call__(self, **kwargs):
-        return self._loaded
+def test_load(sample):
+    parser = LSTParser()
+    assert parser.read(sample) == ["item1", "item2", "item3"]
