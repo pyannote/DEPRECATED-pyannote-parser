@@ -29,6 +29,7 @@
 from __future__ import unicode_literals
 
 
+import six.moves
 import pysrt
 import itertools
 import numpy as np
@@ -102,7 +103,7 @@ class SRTParser(Parser):
             end_times = [T() for line in lines[:-1]] + [end]
 
         start_time = start
-        for line, end_time in itertools.izip(lines, end_times):
+        for line, end_time in six.moves.zip(lines, end_times):
             yield line, start_time, end_time
             start_time = end_time
 

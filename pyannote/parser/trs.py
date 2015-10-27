@@ -77,7 +77,7 @@ class TRSParser(BaseAnnotationParser):
             for label in m.group(1).split(','):
                 try:
                     labels.append(str(label))
-                except Exception, e:
+                except Exception as e:
                     print "label = %s" % label
                     raise e
             string = string[m.end():]

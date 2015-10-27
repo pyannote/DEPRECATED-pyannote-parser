@@ -27,6 +27,8 @@
 # Hervé BREDIN - http://herve.niderb.fr
 
 import itertools
+import six
+import six.moves
 from pyannote.parser import LSTParser
 from pyannote.parser import MagicParser
 
@@ -86,7 +88,7 @@ class CoParser(object):
         self.loadFunc = {}
 
         # go over all **kwarg
-        for key, value in kwargs.iteritems():
+        for key, value in six.iteritems(kwargs):
             self.loadFunc[key] = self._make_load(value, key=key, uris=uris)
 
         # if uris is None, use 'uris' kwargs with no {uri} in it
@@ -119,7 +121,7 @@ class CoParser(object):
             if key == 'uris':
                 g = iter(self.uris)
             elif key in self.loadFunc:
-                g = itertools.imap(self.loadFunc[key], self.uris)
+                g = six.moves.map(self.loadFunc[key], self.uris)
             else:
                 g = itertools.repeat(None)
 
@@ -128,5 +130,5 @@ class CoParser(object):
         return G
 
     def iter(self, *args):
-        for _ in itertools.izip(*self.generators(*args)):
+        for _ in six.moves.zip(*self.generators(*args)):
             yield _

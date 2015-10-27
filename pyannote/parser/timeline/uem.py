@@ -31,7 +31,7 @@ from __future__ import unicode_literals
 from pyannote.core import Segment
 from pyannote.core import PYANNOTE_URI
 
-from base import TimelineParser
+from .base import TimelineParser
 
 
 class UEMParser(TimelineParser):

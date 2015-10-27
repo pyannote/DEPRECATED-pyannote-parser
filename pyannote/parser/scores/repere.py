@@ -27,11 +27,12 @@
 # Hervé BREDIN - http://herve.niderb.fr
 
 from __future__ import unicode_literals
+from __future__ import print_function
 
 from pyannote.core import Segment
 from pyannote.core import PYANNOTE_URI, PYANNOTE_MODALITY, PYANNOTE_LABEL
 
-from base import ScoresParser
+from .base import ScoresParser
 
 from pyannote.core import PYANNOTE_SCORE
 
@@ -61,6 +62,6 @@ class REPEREScoresParser(ScoresParser):
                 f.write(format % (segment.start, segment.end,
                                   label, value))
 
-        except Exception, e:
-            print "Error @ %s%s %s %s" % (uri, segment, track, label)
+        except Exception as e:
+            print("Error @ %s%s %s %s" % (uri, segment, track, label))
             raise e

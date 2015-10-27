@@ -28,6 +28,7 @@
 
 from __future__ import unicode_literals
 
+import six
 from abc import ABCMeta, abstractmethod
 
 
@@ -65,20 +66,20 @@ class Parser(object):
         # filter out all annotations
         # but the ones for the requested resource
         if uri is not None:
-            match = {(v, m): ann for (v, m), ann in match.iteritems()
+            match = {(v, m): ann for (v, m), ann in six.iteritems(match)
                      if v == uri}
 
         # filter out all remaining annotations
         # but the ones for the requested modality
         if modality is not None:
-            match = {(v, m): ann for (v, m), ann in match.iteritems()
+            match = {(v, m): ann for (v, m), ann in six.iteritems(match)
                      if m == modality}
 
         if len(match) == 0:
             A = self.empty(uri=uri, modality=modality, **kwargs)
 
         elif len(match) == 1:
-            A = match.values()[0]
+            A = list(match.values())[0]
 
         else:
             msg = 'Found more than one matching annotation: %s'

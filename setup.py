@@ -40,8 +40,9 @@ setup(
     namespace_packages=['pyannote'],
     packages=find_packages(),
     install_requires=[
-        'pyannote.core >= 0.3',
+        'pyannote.core >= 0.4.1',
         'pysrt >= 1.0.1',
+        'six >= 1.10.0'
     ],
     # versioneer
     version=versioneer.get_version(),
@@ -59,6 +60,9 @@ setup(
         "License :: OSI Approved :: MIT License",
         "Natural Language :: English",
         "Programming Language :: Python :: 2.7",
+        "Programming Language :: Python :: 3",
+        "Programming Language :: Python :: 3.4",
+        "Programming Language :: Python :: 3.5",
         "Topic :: Scientific/Engineering"
     ],
     entry_points="""
