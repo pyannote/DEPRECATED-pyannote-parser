@@ -1,3 +1,8 @@
+### Version 0.4 (2015-10-27)
+
+  - feat: Python 3 support
+  - feat: test suite
+
 ### Version 0.3 (2014-12-09)
 
   - setup: switch to pyannote.core 0.3
