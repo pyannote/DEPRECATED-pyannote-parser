@@ -108,7 +108,7 @@ class CTMParser(Parser, IterLinesMixin):
                 continue
 
             # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-            confidence = fields[5]
+            confidence = float(fields[5])
 
             start_time = round(float(fields[2]), 3)
             duration = round(float(fields[3]), 3)
