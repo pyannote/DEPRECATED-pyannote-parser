@@ -1,3 +1,8 @@
+### Version 0.4.1 (2015-11-03)
+
+  - feat: Travis continuous integration
+  - fix: TRSParser Python3 support
+
 ### Version 0.4 (2015-10-27)
 
   - feat: Python 3 support
