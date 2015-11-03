@@ -26,6 +26,9 @@
 # AUTHORS
 # Hervé BREDIN - http://herve.niderb.fr
 
+
+from __future__ import print_function
+
 """
 Support for TRS file format
 
@@ -78,7 +81,7 @@ class TRSParser(BaseAnnotationParser):
                 try:
                     labels.append(str(label))
                 except Exception as e:
-                    print "label = %s" % label
+                    print("label = %s" % label)
                     raise e
             string = string[m.end():]
             m = p.match(string)
