@@ -29,9 +29,9 @@
 from __future__ import unicode_literals
 
 
+import warnings
 import six.moves
 import pysrt
-import itertools
 import numpy as np
 from pyannote.core import Transcription, T, TStart, TEnd
 
@@ -96,7 +96,7 @@ class SRTParser(Parser):
         """Iterate dialogue lines + (estimated) timeranges"""
 
         if self.duration:
-            length = np.array([len(line) for line in lines])
+            length = np.array([len(line)+1 for line in lines])
             ratio = 1. * np.cumsum(length) / np.sum(length)
             end_times = start + (end - start) * ratio
         else:
@@ -140,10 +140,10 @@ class SRTParser(Parser):
             # if there is a gap between them
             if start > prev_end:
                 transcription.add_edge(prev_end, start)
-            # raise an error in case current subtitle starts
+            # warning in case current subtitle starts
             # before previous subtitle ends
             elif start < prev_end:
-                raise ValueError('Non-chronological subtitles')
+                warnings.warn('Non-chronological subtitles')
 
             # split subtitle in multiple speaker lines (only if needed)
             lines = self._split(subtitle.text)
