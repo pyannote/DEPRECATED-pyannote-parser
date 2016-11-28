@@ -40,7 +40,7 @@ setup(
     namespace_packages=['pyannote'],
     packages=find_packages(),
     install_requires=[
-        'pyannote.core >= 0.4.1',
+        'pyannote.core >= 0.8',
         'pysrt >= 1.0.1',
         'six >= 1.10.0'
     ],
@@ -71,6 +71,7 @@ setup(
         JSONParser=pyannote.parser.generic.json:JSONParser
         PKLParser=pyannote.parser.generic.pkl:PKLParser
         MDTMParser=pyannote.parser.annotation.mdtm:MDTMParser
+        SEGParser=pyannote.parser.annotation.seg:SEGParser
         REPEREParser=pyannote.parser.annotation.repere:REPEREParser
         REPEREScoresParser=pyannote.parser.scores.repere:REPEREScoresParser
         UEMParser=pyannote.parser.timeline.uem:UEMParser
