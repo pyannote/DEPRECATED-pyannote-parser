@@ -1,3 +1,8 @@
+### Version 0.5 (2016-11-28)
+
+  - feat: add SEGParser
+  - setup: switch to pyannote.core 0.8
+
 ### Version 0.4.2 (2015-12-10)
 
   - fix: SRTParser bug with blank subtitles
