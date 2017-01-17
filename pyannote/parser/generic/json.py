@@ -3,7 +3,7 @@
 
 # The MIT License (MIT)
 
-# Copyright (c) 2014-2015 CNRS
+# Copyright (c) 2014-2017 CNRS
 
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -40,7 +40,8 @@ class JSONParser(Parser):
         return ['json']
 
     def read(self, path, **kwargs):
-        self._loaded = pyannote.core.json.load(path)
+        with open(path, 'r') as fp:
+            self._loaded = pyannote.core.json.load(fp)
         return self
 
     def empty(self, uri=None, modality=None, **kwargs):

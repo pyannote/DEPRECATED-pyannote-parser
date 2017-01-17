@@ -3,7 +3,7 @@
 
 # The MIT License (MIT)
 
-# Copyright (c) 2014-2015 CNRS
+# Copyright (c) 2014-2017 CNRS
 
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -62,13 +62,13 @@ class TimelineParser(Parser):
 
         # remove comment lines
         # (i.e. lines for which all fields are either None or NaN)
-        keep = [not all([pandas.isnull(r[n]) for n in self.fields()])
-                for _, r in df.iterrows()]
+        keep = [not all(pandas.isnull(item) for item in row[1:])
+                for row in df.itertuples()]
         df = df[keep]
 
         # add 'segment' column build from start time & duration
         df[PYANNOTE_SEGMENT] = [self.get_segment(row)
-                                for r, row in df.iterrows()]
+                                for row in df.itertuples()]
 
         # add uri column in case it does not exist
         if PYANNOTE_URI not in df:

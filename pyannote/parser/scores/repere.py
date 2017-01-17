@@ -3,7 +3,7 @@
 
 # The MIT License (MIT)
 
-# Copyright (c) 2012-2015 CNRS
+# Copyright (c) 2012-2017 CNRS
 
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -52,7 +52,7 @@ class REPEREScoresParser(ScoresParser):
                 PYANNOTE_SCORE]
 
     def get_segment(self, row):
-        return Segment(row['start'], row['end'])
+        return Segment(row[2], row[3])
 
     def _append(self, scores, f, uri, modality):
 
