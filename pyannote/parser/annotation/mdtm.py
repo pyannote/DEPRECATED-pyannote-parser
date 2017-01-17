@@ -59,7 +59,7 @@ class MDTMParser(AnnotationParser):
         return ';'
 
     def get_segment(self, row):
-        return Segment(row[2], row[2] + row[3])
+        return Segment(row[3], row[3] + row[4])
 
     def _append(self, annotation, f, uri, modality):
 
