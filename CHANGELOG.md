@@ -1,4 +1,4 @@
-### Version 0.6 (2017-01-17)
+### Version 0.6.1 (2017-01-17)
 
   - improve: major speed-up
   - setup: swith to pyannote.core 0.9
