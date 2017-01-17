@@ -1,3 +1,9 @@
+### Version 0.6 (2017-01-17)
+
+  - improve: major speed-up
+  - setup: swith to pyannote.core 0.9
+  - fix: fix JSONParser
+
 ### Version 0.5 (2016-11-28)
 
   - feat: add SEGParser
