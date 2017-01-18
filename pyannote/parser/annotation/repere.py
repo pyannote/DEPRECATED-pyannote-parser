@@ -29,7 +29,8 @@
 from __future__ import unicode_literals
 from __future__ import print_function
 
-from pyannote.core import Segment, Unknown
+from pyannote.core import Segment
+from pyannote.core.scores import Unknown
 from pyannote.core import PYANNOTE_URI, PYANNOTE_MODALITY, PYANNOTE_LABEL
 
 from .base import AnnotationParser
