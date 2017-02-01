@@ -26,6 +26,7 @@
 # AUTHORS
 # Hervé BREDIN - http://herve.niderb.fr
 
+import io
 from abc import abstractmethod
 from pyannote.parser.base import Parser
 
@@ -147,13 +148,9 @@ class AnnotationParser(Parser):
         if modality is None:
             modality = annotation.modality
 
-        if isinstance(f, file):
+        with io.open(f, mode='a', closefd=False) as g:
             self._append(annotation, f, uri, modality)
-            f.flush()
-
-        else:
-            with open(f, 'w') as g:
-                self._append(annotation, g, uri, modality)
+            g.flush()
 
     def _append(self, annotation, f, uri, modality):
         raise NotImplementedError('')
