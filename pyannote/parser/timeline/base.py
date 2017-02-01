@@ -26,7 +26,6 @@
 # AUTHORS
 # Hervé BREDIN - http://herve.niderb.fr
 
-import io
 from abc import abstractmethod
 from pyannote.parser.base import Parser
 
@@ -96,14 +95,14 @@ class TimelineParser(Parser):
     def empty(self, uri=None, **kwargs):
         return Timeline(uri=uri)
 
-    def write(self, timeline, f=None, uri=None, **kwargs):
+    def write(self, timeline, f, uri=None, **kwargs):
         """
 
         Parameters
         ----------
         timeline : `Timeline`
             Timeline
-        f : file or str, optional
+        f : file handle
             Default is stdout.
         uri, modality : str, optional
             Override `timeline` attributes
@@ -113,9 +112,7 @@ class TimelineParser(Parser):
         if uri is None:
             uri = timeline.uri
 
-        with io.open(f, mode='a', closefd=False) as g:
-            self._append(timeline, f, uri)
-            g.flush()
+        self._append(timeline, f, uri)
 
     def _append(self, timeline, f, uri):
         raise NotImplementedError('')

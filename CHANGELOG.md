@@ -1,3 +1,7 @@
+### Version 0.6.4 (2017-02-01)
+
+  - fix: fix py3 support
+
 ### Version 0.6.2 (2017-01-18)
 
   - setup: switch to pyannote.core 0.10

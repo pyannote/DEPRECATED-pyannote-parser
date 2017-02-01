@@ -26,7 +26,6 @@
 # AUTHORS
 # Hervé BREDIN - http://herve.niderb.fr
 
-import io
 from abc import abstractmethod
 from pyannote.parser.base import Parser
 
@@ -129,15 +128,14 @@ class AnnotationParser(Parser):
     def empty(self, uri=None, modality=None, **kwargs):
         return Annotation(uri=uri, modality=modality)
 
-    def write(self, annotation, f=None, uri=None, modality=None):
+    def write(self, annotation, f, uri=None, modality=None):
         """
 
         Parameters
         ----------
         annotation : `Annotation` or `Score`
             Annotation
-        f : file or str, optional
-            Default is stdout.
+        f : file handle
         uri, modality : str, optional
             Override `annotation` attributes
 
@@ -148,9 +146,7 @@ class AnnotationParser(Parser):
         if modality is None:
             modality = annotation.modality
 
-        with io.open(f, mode='a', closefd=False) as g:
-            self._append(annotation, f, uri, modality)
-            g.flush()
+        self._append(annotation, f, uri, modality)
 
     def _append(self, annotation, f, uri, modality):
         raise NotImplementedError('')

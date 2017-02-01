@@ -26,7 +26,6 @@
 # AUTHORS
 # Hervé BREDIN - http://herve.niderb.fr
 
-import io
 from abc import abstractmethod
 from pyannote.parser.base import Parser
 
@@ -130,13 +129,13 @@ class ScoresParser(Parser):
     def empty(self, uri=None, modality=None, **kwargs):
         return Scores(uri=uri, modality=modality)
 
-    def write(self, scores, f=None, uri=None, modality=None):
+    def write(self, scores, f, uri=None, modality=None):
         """
 
         Parameters
         ----------
         scores : `Score`
-        f : file or str, optional
+        f : file handle
             Default is stdout.
         uri, modality : str, optional
             Override `scores` attributes
@@ -148,9 +147,7 @@ class ScoresParser(Parser):
         if modality is None:
             modality = scores.modality
 
-        with io.open(f, mode='a', closefd=False) as g:
-            self._append(scores, f, uri, modality)
-            g.flush()
+        self._append(scores, f, uri, modality)
 
     def _append(self, scores, f, uri, modality):
         raise NotImplementedError('')
