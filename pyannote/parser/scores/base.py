@@ -26,6 +26,7 @@
 # AUTHORS
 # Hervé BREDIN - http://herve.niderb.fr
 
+import io
 from abc import abstractmethod
 from pyannote.parser.base import Parser
 
@@ -147,13 +148,9 @@ class ScoresParser(Parser):
         if modality is None:
             modality = scores.modality
 
-        if isinstance(f, file):
+        with io.open(f, mode='a', closefd=False) as g:
             self._append(scores, f, uri, modality)
-            f.flush()
-
-        else:
-            with open(f, 'w') as g:
-                self._append(scores, g, uri, modality)
+            g.flush()
 
     def _append(self, scores, f, uri, modality):
         raise NotImplementedError('')

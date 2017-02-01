@@ -26,6 +26,7 @@
 # AUTHORS
 # Hervé BREDIN - http://herve.niderb.fr
 
+import io
 from abc import abstractmethod
 from pyannote.parser.base import Parser
 
@@ -112,13 +113,9 @@ class TimelineParser(Parser):
         if uri is None:
             uri = timeline.uri
 
-        if isinstance(f, file):
+        with io.open(f, mode='a', closefd=False) as g:
             self._append(timeline, f, uri)
-            f.flush()
-
-        else:
-            with open(f, 'w') as g:
-                self._append(timeline, g, uri)
+            g.flush()
 
     def _append(self, timeline, f, uri):
         raise NotImplementedError('')
