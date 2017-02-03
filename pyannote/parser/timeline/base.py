@@ -58,7 +58,8 @@ class TimelineParser(Parser):
                                delim_whitespace=True,
                                header=None, names=self.fields(),
                                comment=self.comment(),
-                               converters=self.converters())
+                               converters=self.converters(),
+                               keep_default_na=False, na_values=[])
 
         # remove comment lines
         # (i.e. lines for which all fields are either None or NaN)

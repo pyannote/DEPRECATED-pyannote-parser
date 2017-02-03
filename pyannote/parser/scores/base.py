@@ -73,7 +73,8 @@ class ScoresParser(Parser):
                                comment=self.comment(),
                                converters=self.converters(),
                                dtype={PYANNOTE_LABEL: object,
-                                      PYANNOTE_SCORE: float})
+                                      PYANNOTE_SCORE: float},
+                               keep_default_na=False, na_values=[])
 
         # remove comment lines
         # (i.e. lines for which all fields are either None or NaN)
