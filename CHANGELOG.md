@@ -1,3 +1,7 @@
+### Version 0.6.5 (2017-02-03)
+
+  - fix: fix corner case where certain labels are changed to NaN by pandas.read_table
+
 ### Version 0.6.4 (2017-02-01)
 
   - fix: fix py3 support
