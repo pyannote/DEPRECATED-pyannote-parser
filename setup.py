@@ -40,8 +40,7 @@ setup(
     namespace_packages=['pyannote'],
     packages=find_packages(),
     install_requires=[
-        'pyannote.core >= 0.12.1',
-        'pysrt >= 1.0.1',
+        'pyannote.core >= 1.1',
         'six >= 1.10.0'
     ],
     # versioneer
@@ -63,6 +62,7 @@ setup(
         "Programming Language :: Python :: 3",
         "Programming Language :: Python :: 3.4",
         "Programming Language :: Python :: 3.5",
+        "Programming Language :: Python :: 3.6",
         "Topic :: Scientific/Engineering"
     ],
     entry_points="""
@@ -75,7 +75,5 @@ setup(
         REPEREParser=pyannote.parser.annotation.repere:REPEREParser
         REPEREScoresParser=pyannote.parser.scores.repere:REPEREScoresParser
         UEMParser=pyannote.parser.timeline.uem:UEMParser
-        SRTParser=pyannote.parser.transcription.srt:SRTParser
-        CTMParser=pyannote.parser.transcription.ctm:CTMParser
     """
 )
