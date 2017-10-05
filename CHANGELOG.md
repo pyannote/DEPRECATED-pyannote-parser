@@ -1,3 +1,8 @@
+### Version 0.7 (2017-10-05)
+
+  - BREAKING: remove Transcription support
+  - setup: switch to pyannote.core 1.1
+
 ### Version 0.6.5 (2017-02-03)
 
   - fix: fix corner case where certain labels are changed to NaN by pandas.read_table
