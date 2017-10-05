@@ -41,7 +41,6 @@ setup(
     packages=find_packages(),
     install_requires=[
         'pyannote.core >= 0.12.1',
-        'pysrt >= 1.0.1',
         'six >= 1.10.0'
     ],
     # versioneer
@@ -75,7 +74,5 @@ setup(
         REPEREParser=pyannote.parser.annotation.repere:REPEREParser
         REPEREScoresParser=pyannote.parser.scores.repere:REPEREScoresParser
         UEMParser=pyannote.parser.timeline.uem:UEMParser
-        SRTParser=pyannote.parser.transcription.srt:SRTParser
-        CTMParser=pyannote.parser.transcription.ctm:CTMParser
     """
 )
