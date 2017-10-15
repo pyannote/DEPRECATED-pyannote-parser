@@ -40,7 +40,7 @@ setup(
     namespace_packages=['pyannote'],
     packages=find_packages(),
     install_requires=[
-        'pyannote.core >= 1.1',
+        'pyannote.core >= 1.2',
         'six >= 1.10.0'
     ],
     # versioneer
