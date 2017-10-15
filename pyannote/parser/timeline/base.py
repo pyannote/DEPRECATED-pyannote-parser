@@ -59,7 +59,8 @@ class TimelineParser(Parser):
                                header=None, names=self.fields(),
                                comment=self.comment(),
                                converters=self.converters(),
-                               keep_default_na=False, na_values=[])
+                               keep_default_na=False, na_values=[],
+                               dtype={PYANNOTE_URI: object})
 
         # remove comment lines
         # (i.e. lines for which all fields are either None or NaN)

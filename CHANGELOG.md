@@ -1,3 +1,8 @@
+### Version 0.7.1 (2017-10-15)
+
+  - fix: fix corner case where uris look like numbers
+  - setup: switch to pyannote.core 1.2
+
 ### Version 0.7 (2017-10-05)
 
   - BREAKING: remove Transcription support
