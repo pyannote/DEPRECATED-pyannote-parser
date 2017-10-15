@@ -72,7 +72,8 @@ class ScoresParser(Parser):
                                header=None, names=self.fields(),
                                comment=self.comment(),
                                converters=self.converters(),
-                               dtype={PYANNOTE_LABEL: object,
+                               dtype={PYANNOTE_URI: object,
+                                      PYANNOTE_LABEL: object,
                                       PYANNOTE_SCORE: float},
                                keep_default_na=False, na_values=[])
 
