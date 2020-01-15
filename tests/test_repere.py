@@ -31,7 +31,6 @@ from __future__ import print_function
 import pytest
 from pyannote.core import Segment
 from pyannote.parser import REPEREParser
-from pyannote.parser import REPEREScoresParser
 import tempfile
 import os
 
@@ -40,37 +39,12 @@ uri1 3.0 7.5 speech barbara
 uri1 6.0 9.0 speech chris
 """
 
-SAMPLE_SCORES = """uri1 1.0 3.5 speech alice 0.8
-uri1 1.0 3.5 speech barbara 0.1
-uri1 1.0 3.5 speech chris 0.1
-uri1 3.0 7.5 speech barbara 0.5
-uri1 3.0 7.5 speech chris 0.4
-uri1 6.0 9.0 speech alice 0.1
-uri1 6.0 9.0 speech barbara 0.2
-uri1 6.0 9.0 speech chris 0.7
-"""
-
-
 @pytest.fixture
 def sample_annotation(request):
 
     _, filename = tempfile.mkstemp()
     with open(filename, 'w') as f:
         f.write(SAMPLE_ANNOTATION)
-
-    def delete():
-        os.remove(filename)
-    request.addfinalizer(delete)
-
-    return filename
-
-
-@pytest.fixture
-def sample_scores(request):
-
-    _, filename = tempfile.mkstemp()
-    with open(filename, 'w') as f:
-        f.write(SAMPLE_SCORES)
 
     def delete():
         os.remove(filename)
@@ -87,18 +61,3 @@ def test_load_annotation(sample_annotation):
         (Segment(1, 3.5), 0, 'alice'),
         (Segment(3, 7.5), 1, 'barbara'),
         (Segment(6, 9), 2, 'chris')]
-
-
-def test_load_scores(sample_scores):
-    parser = REPEREScoresParser()
-    scores = parser.read(sample_scores)
-    speaker1 = scores(uri="uri1", modality="speech")
-    assert list(speaker1.itervalues()) == [
-        (Segment(1, 3.5), 0, 'alice', 0.8),
-        (Segment(1, 3.5), 1, 'barbara', 0.1),
-        (Segment(1, 3.5), 2, 'chris', 0.1),
-        (Segment(3, 7.5), 3, 'barbara', 0.5),
-        (Segment(3, 7.5), 4, 'chris', 0.4),
-        (Segment(6, 9), 5, 'alice', 0.1),
-        (Segment(6, 9), 6, 'barbara', 0.2),
-        (Segment(6, 9), 7, 'chris', 0.7)]

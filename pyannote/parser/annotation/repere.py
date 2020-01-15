@@ -3,7 +3,7 @@
 
 # The MIT License (MIT)
 
-# Copyright (c) 2014-2017 CNRS
+# Copyright (c) 2014-2020 CNRS
 
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -30,57 +30,9 @@ from __future__ import unicode_literals
 from __future__ import print_function
 
 from pyannote.core import Segment
-from pyannote.core.scores import Unknown
 from pyannote.core import PYANNOTE_URI, PYANNOTE_MODALITY, PYANNOTE_LABEL
 
 from .base import AnnotationParser
-
-
-class REPERELabelConverter(object):
-    """Label converter
-
-    Converts 'unknown' labels to Unknown instances while preserving others.
-
-    Usage
-    -----
-
-    >>> Unknown.reset()
-    >>> converter = REPERELabelConverter()
-    >>> converter('Nicolas_SARKOZY')
-    'Nicolas_SARKOZY'
-    >>> converter('Inconnu_123')
-    #1
-    >>> converter('speaker#23')
-    #2
-    """
-
-    def __init__(self):
-        super(REPERELabelConverter, self).__init__()
-        self.dict = {}
-
-    def _unknown(self, label):
-        # check whether `label` follows REPERE's unknown naming convention
-        return label[:8] == 'Inconnu_' or label[:7] == 'speaker'
-
-    def __call__(self, label):
-        # convert label
-
-        if label not in self.dict:
-
-            # if label is unknown, create a new Unknown instance
-            if self._unknown(label):
-                self.dict[label] = Unknown()
-
-            # if label is not unknown, add itself to internal dict
-            else:
-                self.dict[label] = label
-
-        # return converted label
-        return self.dict[label]
-
-    def convert(self, annotation):
-        mapping = {label: self(label) for label in annotation.labels()}
-        return annotation.translate(mapping)
 
 
 class REPEREParser(AnnotationParser):
@@ -101,7 +53,7 @@ class REPEREParser(AnnotationParser):
         return ';'
 
     def converters(self):
-        return {PYANNOTE_LABEL: REPERELabelConverter()}
+        return None
 
     def get_segment(self, row):
         return Segment(row[2], row[3])
