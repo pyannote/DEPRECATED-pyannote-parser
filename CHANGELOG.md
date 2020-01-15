@@ -1,3 +1,10 @@
+### Version 0.8 (2020-01-15)
+
+  - BREAKING: switch to pyannote.core 3.3
+  - BREAKING: remove parsers based on pyannote.core.Scores
+  - BREAKING: remove unused CoParser
+  - doc: make it explicit that project is no longer maintainted
+
 ### Version 0.7.1 (2017-10-15)
 
   - fix: fix corner case where uris look like numbers
