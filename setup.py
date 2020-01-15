@@ -40,7 +40,7 @@ setup(
     namespace_packages=['pyannote'],
     packages=find_packages(),
     install_requires=[
-        'pyannote.core >= 1.2',
+        'pyannote.core >= 3.3',
         'six >= 1.10.0'
     ],
     # versioneer
@@ -49,7 +49,7 @@ setup(
 
     # PyPI
     name='pyannote.parser',
-    description=('PyAnnote parsers'),
+    description=('pyannote parsers (deprecated)'),
     author='Hervé Bredin',
     author_email='bredin@limsi.fr',
     url='http://herve.niderb.fr/',
@@ -58,11 +58,9 @@ setup(
         "Intended Audience :: Science/Research",
         "License :: OSI Approved :: MIT License",
         "Natural Language :: English",
-        "Programming Language :: Python :: 2.7",
-        "Programming Language :: Python :: 3",
-        "Programming Language :: Python :: 3.4",
-        "Programming Language :: Python :: 3.5",
         "Programming Language :: Python :: 3.6",
+        "Programming Language :: Python :: 3.7",
+        "Programming Language :: Python :: 3.8",
         "Topic :: Scientific/Engineering"
     ],
     entry_points="""
@@ -73,7 +71,6 @@ setup(
         MDTMParser=pyannote.parser.annotation.mdtm:MDTMParser
         SEGParser=pyannote.parser.annotation.seg:SEGParser
         REPEREParser=pyannote.parser.annotation.repere:REPEREParser
-        REPEREScoresParser=pyannote.parser.scores.repere:REPEREScoresParser
         UEMParser=pyannote.parser.timeline.uem:UEMParser
     """
 )
