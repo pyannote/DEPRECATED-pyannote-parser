@@ -69,6 +69,7 @@ setup(
         JSONParser=pyannote.parser.generic.json:JSONParser
         PKLParser=pyannote.parser.generic.pkl:PKLParser
         MDTMParser=pyannote.parser.annotation.mdtm:MDTMParser
+        RTTMParser=pyannote.parser.annotation.rttm:RTTMParser
         SEGParser=pyannote.parser.annotation.seg:SEGParser
         REPEREParser=pyannote.parser.annotation.repere:REPEREParser
         UEMParser=pyannote.parser.timeline.uem:UEMParser
